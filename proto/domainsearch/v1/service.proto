@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package domainsearch.v1;
+
+import "google/rpc/status.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1;domainsearchv1";
+
+// The request for SearchPrices method.
+message SearchPricesRequest {
+  // The product identifier.
+  string product = 1;
+
+  // The query is query string for fetching products prices.
+  // For example, "domain" product if domain is example.com, query string is "example".
+  string query = 2;
+
+  // The currency code defines the currency for requested prices. If currency_code is omitted or incorrect, product's
+  // currency will be used.
+  string currency_code = 3;
+
+  // The filter parameters.
+  PriceFilter filter = 4;
+}
+
+message PriceFilter {
+  oneof product {
+    // The filter for the product "domain".
+    DomainPriceFilter domain = 1;
+  }
+}
+
+message DomainPriceFilter {
+  // The number of the quantity.
+  google.protobuf.UInt32Value quantity = 1;
+
+  oneof tldFilter {
+    // The excludedTldNames is comma separated string containing the TLDs to be excluded from the list with the results.
+    // For example, excludedTldNames=com,co.uk.
+    // Redundant space characters in the syntax are insignificant. "com,co.uk" and "  com,    co.uk" are equivalent.
+    string excludedTldNames = 2;
+
+    // The includedTldNames is comma separated string containing the TLDs to be included to the list with the results.
+    // For example, includedTldNames=com,co.uk.
+    // Redundant space characters in the syntax are insignificant. "com,co.uk" and "  com,    co.uk" are equivalent.
+    string includedTldNames = 3;
+  }
+}
+
+
+// The response from SearchPrices method.
+message SearchPricesResponse {
+  // Requested product's unique identifier.
+  string product_id = 1;
+
+  oneof response {
+    // The response with product's price.
+    PriceData price = 2;
+
+    // The status of the response.
+    google.rpc.Status error = 3;
+  }
+}
+
+// The data related with prices.
+message PriceData {
+  // The map of prices. The key is the type of price. The value is the PriceType object.
+  // Considered keys:
+  // REQUESTED_CURRENCY - current price in requested currency including all discounts (membership, promotions).
+  // If currency doesn't specified in request, here will be price in product currency.
+  // PRODUCT_CURRENCY - current price in product currency including all discounts (membership, promotions).
+  // NON_PROMO_REQUESTED_CURRENCY - price in requested currency without any promotions.
+  // NON_PROMO_PRODUCT_CURRENCY - price in product currency without any promotions.
+  map <string, ProductPrice> prices = 1;
+}
+
+message Promotion {
+  // The period of the promotion actuality.
+  PromotionPeriod period = 1;
+}
+
+// The duration of the promotion.
+message PromotionPeriod {
+  // Promotion start date.
+  google.protobuf.Timestamp from = 1;
+
+  // Promotion end date.
+  google.protobuf.Timestamp to = 2;
+}
+
+// The price type.
+message ProductPrice {
+  // The price amount.
+  Price price = 1;
+
+  // The promotion information.
+  Promotion promotion = 2;
+
+  // Any labels related with price. For example, here could be "premium" label.
+  repeated string labels = 3;
+}
+
+// The price for the product.
+message Price {
+  // The three-letter currency code defined in ISO 4217.
+  // For example, "USD", "EUR" etc.
+  string currency_code = 1;
+
+  // The whole units of the amount.
+  // For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+  int64 units = 2;
+
+  // Number of nano (10^-9) units of the amount.
+  // The value must be between -999,999,999 and +999,999,999 inclusive.
+  // If `units` is positive, `nanos` must be positive or zero.
+  // If `units` is zero, `nanos` can be positive, zero, or negative.
+  // If `units` is negative, `nanos` must be negative or zero.
+  // For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+  int32 nanos = 3;
+
+  // The amount of the price. For example, for `units`=1 and `nanos`=230,000,000 the value will be "1.23".
+  string value = 4;
+}
+
+
+message DomainSuggestion {
+  string domain = 1;
+  bool available = 2;
+}
+
+service DomainSearchService {
+  rpc CheckPrice (SearchPricesRequest) returns (stream SearchPricesResponse);
+}

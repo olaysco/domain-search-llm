@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>OpenProvider AI Domains - Smart Search</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "op-blue": "#0048db",
+            "op-red": "#ff4d4d",
+            "op-gray-light": "#f8fafd",
+            "op-text": "#1a1c1e",
+          },
+          fontFamily: {
+            "sans": ["Montserrat", "sans-serif"],
+            "display": ["Montserrat", "sans-serif"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+            body {
+                @apply font-sans;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .op-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .op-card:hover {
+            border-color: #0048db;
+            box-shadow: 0 10px 25px -5px rgba(0, 72, 219, 0.1);
+        }
+        .match-bar-bg {
+            background: #f1f5f9;
+        }
+        .match-bar-fill {
+            background: #0048db;
+        }
+        .gradient-bg {
+            background: radial-gradient(circle at top right, #f0f4ff 0%, #ffffff 50%), 
+                        radial-gradient(circle at bottom left, #f8fafd 0%, #ffffff 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-op-gray-light text-op-text min-h-screen gradient-bg">
+  <div class="relative flex h-auto w-full flex-col overflow-x-hidden">
+    <header class="glass-header px-6 lg:px-20 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+          <div class="size-8 bg-op-blue rounded-lg flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-xl">temp_preferences_custom</span>
+          </div>
+          <h1 class="text-xl font-extrabold tracking-tight text-slate-900">
+            OpenProvider <span class="text-op-blue">AI</span>
+          </h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <button class="p-2 hover:bg-slate-200 rounded-full transition-colors relative" type="button">
+            <span class="material-symbols-outlined">shopping_cart</span>
+            <span class="absolute top-1 right-1 size-2 bg-op-red rounded-full border-2 border-white"></span>
+          </button>
+          <button class="p-2 hover:bg-slate-200 rounded-full transition-colors" type="button">
+            <span class="material-symbols-outlined">account_circle</span>
+          </button>
+        </div>
+      </header>
+    <main class="flex-1 max-w-[1400px] mx-auto w-full px-6 lg:px-20 py-12">
+      <section class="flex flex-col items-center text-center mb-16">
+        <div
+          class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-op-blue text-[11px] font-bold uppercase tracking-wider">
+          <span class="material-symbols-outlined text-sm">auto_awesome</span>
+          AI-Powered Intelligence
+        </div>
+        <h2 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 max-w-4xl leading-[1.1] text-slate-900">
+          The smarter way to find your <span class="text-op-blue">perfect domain</span>
+        </h2>
+        <p class="text-slate-600 text-lg mb-10 max-w-2xl font-medium">
+          Describe your project in plain English. Our AI analyzes your needs to suggest high-impact domain names and TLD
+          strategies.
+        </p>
+        <div class="w-full max-w-3xl relative group">
+          <div
+            class="relative flex items-center bg-white p-1.5 rounded-xl border-2 border-slate-200 focus-within:border-op-blue shadow-lg transition-all">
+            <div class="pl-4 pr-2 text-slate-400">
+              <span class="material-symbols-outlined">psychology</span>
+            </div>
+            <input
+              class="flex-1 bg-transparent border-none focus:ring-0 text-lg py-4 placeholder:text-slate-400 font-medium"
+              placeholder="Describe your business idea (e.g. eco-friendly yoga studio in Amsterdam)" type="text" />
+            <button
+              class="bg-op-blue hover:bg-blue-700 text-white font-bold px-10 py-4 rounded-lg flex items-center gap-2 transition-all shadow-md">
+              <span>Search</span>
+              <span class="material-symbols-outlined text-sm">search</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-wrap justify-center gap-3 mt-8">
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all">
+            Popular TLDs <span class="material-symbols-outlined text-sm">expand_more</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-op-blue text-white text-sm font-bold shadow-sm">
+            .ai <span class="material-symbols-outlined text-xs">check</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all">
+            .com <span class="material-symbols-outlined text-sm">expand_more</span>
+          </button>
+          <div class="w-px h-8 bg-slate-300 mx-2 hidden sm:block"></div>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all">
+            Professional
+          </button>
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all">
+            Catchy
+          </button>
+        </div>
+      </section>
+      <div class="flex flex-col lg:flex-row gap-10">
+        <div class="flex-1">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <h3 class="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
+              Recommended for you
+              <span
+                class="text-xs font-bold text-slate-500 bg-slate-200/50 px-3 py-1 rounded-full uppercase tracking-tighter">24
+                Domains</span>
+            </h3>
+            <div class="flex items-center gap-2 text-sm font-semibold text-slate-600">
+              Sort by:
+              <select
+                class="bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-900 focus:ring-op-blue focus:border-op-blue cursor-pointer py-1.5 px-3">
+                <option>Relevance</option>
+                <option>Price: Low to High</option>
+                <option>Alphabetical</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="op-card rounded-xl p-6 flex flex-col">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h4 class="text-xl font-extrabold mb-1 text-slate-900">fitcoach.ai</h4>
+                  <span
+                    class="px-2 py-0.5 rounded bg-blue-50 text-op-blue text-[10px] font-bold uppercase tracking-widest">Premium</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-green-600 flex items-center gap-1 text-[11px] font-bold uppercase">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> Available
+                  </div>
+                  <div class="text-2xl font-extrabold text-slate-900">$49.99<span
+                      class="text-xs font-medium text-slate-400">/yr</span></div>
+                </div>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 flex-1 font-medium">Excellent semantic fit for a tech-driven fitness
+                consultancy.</p>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-tight">
+                  <span class="text-op-blue flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">analytics</span> AI Match Score
+                  </span>
+                  <span class="text-slate-900">98%</span>
+                </div>
+                <div class="h-2 w-full match-bar-bg rounded-full overflow-hidden">
+                  <div class="h-full match-bar-fill rounded-full" style="width: 98%"></div>
+                </div>
+                <button
+                  class="w-full mt-2 py-3.5 bg-op-blue text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-sm">
+                  <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+                </button>
+              </div>
+            </div>
+            <div class="op-card rounded-xl p-6 flex flex-col ring-2 ring-op-red/10">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h4 class="text-xl font-extrabold mb-1 text-slate-900">eurofit.io</h4>
+                  <span
+                    class="px-2 py-0.5 rounded bg-op-red text-white text-[10px] font-bold uppercase tracking-widest">Hot</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-green-600 flex items-center gap-1 text-[11px] font-bold uppercase">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> Available
+                  </div>
+                  <div class="text-2xl font-extrabold text-op-red">$32.00<span
+                      class="text-xs font-medium text-slate-400 line-through ml-1">$45.00</span></div>
+                </div>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 flex-1 font-medium">Strong tech-oriented extension for your European
+                presence.</p>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-tight">
+                  <span class="text-op-blue flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">analytics</span> AI Match Score
+                  </span>
+                  <span class="text-slate-900">94%</span>
+                </div>
+                <div class="h-2 w-full match-bar-bg rounded-full overflow-hidden">
+                  <div class="h-full match-bar-fill rounded-full" style="width: 94%"></div>
+                </div>
+                <button
+                  class="w-full mt-2 py-3.5 bg-op-blue text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-sm">
+                  <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+                </button>
+              </div>
+            </div>
+            <div class="op-card rounded-xl p-6 flex flex-col bg-slate-50/50">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h4 class="text-xl font-extrabold mb-1 text-slate-900">coachly.com</h4>
+                  <span
+                    class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-widest">Standard</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-slate-500 flex items-center gap-1 text-[11px] font-bold uppercase">
+                    <span class="material-symbols-outlined text-sm">lock</span> Already Taken
+                  </div>
+                  <div class="text-lg font-bold text-slate-400">Negotiable</div>
+                </div>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 flex-1 font-medium">A high-value authority domain name for global
+                scaling.</p>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-tight">
+                  <span class="text-op-blue flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">analytics</span> AI Match Score
+                  </span>
+                  <span class="text-slate-900">91%</span>
+                </div>
+                <div class="h-2 w-full match-bar-bg rounded-full overflow-hidden">
+                  <div class="h-full match-bar-fill rounded-full" style="width: 91%"></div>
+                </div>
+                <button
+                  class="w-full mt-2 py-3.5 border-2 border-slate-200 text-slate-700 font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-colors">
+                  <span class="material-symbols-outlined text-lg">contact_mail</span> Inquire through Broker
+                </button>
+              </div>
+            </div>
+            <div class="op-card rounded-xl p-6 flex flex-col">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h4 class="text-xl font-extrabold mb-1 text-slate-900">fitflow.eu</h4>
+                  <span
+                    class="px-2 py-0.5 rounded bg-blue-50 text-op-blue text-[10px] font-bold uppercase tracking-widest">Premium</span>
+                    <span
+                    class="px-2 py-0.5 rounded bg-op-red text-white text-[10px] font-bold uppercase tracking-widest">Hot</span>
+                </div>
+                <div class="text-right">
+                  <div class="text-green-600 flex items-center gap-1 text-[11px] font-bold uppercase">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> Available
+                  </div>
+                  <div class="text-2xl font-extrabold text-slate-900">$12.00<span
+                      class="text-xs font-medium text-slate-400">/yr</span></div>
+                </div>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 flex-1 font-medium">Great for building trust with customers within
+                the EU.</p>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-tight">
+                  <span class="text-op-blue flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">analytics</span> AI Match Score
+                  </span>
+                  <span class="text-slate-900">88%</span>
+                </div>
+                <div class="h-2 w-full match-bar-bg rounded-full overflow-hidden">
+                  <div class="h-full match-bar-fill rounded-full" style="width: 88%"></div>
+                </div>
+                <button
+                  class="w-full mt-2 py-3.5 bg-op-blue text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors shadow-sm">
+                  <span class="material-symbols-outlined text-lg">add_shopping_cart</span> Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="w-full lg:w-[340px] space-y-8">
+          <div class="op-card rounded-xl p-8">
+            <h4 class="font-extrabold text-lg mb-6 flex items-center gap-2 text-slate-900">
+              <span class="material-symbols-outlined text-op-blue">tune</span>
+              Fine-tune results
+            </h4>
+            <div class="space-y-6">
+              <div>
+                <p class="text-[11px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Project Vibes</p>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700 hover:border-op-blue hover:text-op-blue transition-all">Modern</button>
+                  <button
+                    class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700 hover:border-op-blue hover:text-op-blue transition-all">Playful</button>
+                  <button
+                    class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700 hover:border-op-blue hover:text-op-blue transition-all">Luxurious</button>
+                  <button
+                    class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700 hover:border-op-blue hover:text-op-blue transition-all">Trustworthy</button>
+                </div>
+              </div>
+              <div>
+                <p class="text-[11px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Modify Prompt</p>
+                <ul class="space-y-3">
+                  <li
+                    class="flex items-center justify-between text-sm group cursor-pointer font-semibold text-slate-600 hover:text-op-blue">
+                    <span>Add "Health" keyword</span>
+                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                  </li>
+                  <li
+                    class="flex items-center justify-between text-sm group cursor-pointer font-semibold text-slate-600 hover:text-op-blue">
+                    <span>Focus on mobile app</span>
+                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-xl overflow-hidden relative group cursor-pointer shadow-lg border border-op-blue/10">
+            <div class="absolute inset-0 bg-op-blue"></div>
+            <div class="absolute inset-0 bg-center bg-cover mix-blend-soft-light opacity-30"
+              style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCdF5Kzn2jck4flRYUdt1Pp5svnxtwJPG-gId-qInjPd8q9Pv0f6hUdAdNlNF8sBJc5LCl2uV4j2wcLHfePAtlbnb9C9lmcxcR5nmfdOMbAvYmmkBh0-XSZE5eeHg3wR2tF8k9ghPerSfHihMmIi7jT8c66tPxQXbMSEQ8LueGJbjxY6fmvwDk5fUuvEweJwodXmCQtw3gO8LVSlkjh7SKAgLk6yU6qnytMgB0y7PafVMjMLxOQWIuDIqjT8sBr9--fLlK2kLDk7uc');">
+            </div>
+            <div class="relative p-8 text-white">
+              <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-6 backdrop-blur-md">
+                <span class="material-symbols-outlined text-white text-3xl">dns</span>
+              </div>
+              <h5 class="text-xl font-extrabold mb-3 leading-tight">Bundle with Managed Hosting</h5>
+              <p class="text-sm text-white/90 mb-8 font-medium">Claim your domain for free when you sign up for an
+                annual hosting plan today.</p>
+              <button
+                class="w-full py-3.5 bg-white text-op-blue font-extrabold rounded-lg text-sm hover:bg-slate-50 transition-colors">
+                Explore Plans
+              </button>
+            </div>
+          </div>
+          <div class="p-8 bg-white border border-slate-200 rounded-xl">
+            <h4 class="font-extrabold mb-4 text-sm text-slate-900 uppercase tracking-wide">Market Insight</h4>
+            <p class="text-sm text-slate-600 leading-relaxed font-medium">
+              Domains ending in <span class="text-op-blue font-bold">.ai</span> have seen a <span
+                class="text-op-red font-bold">65% increase</span> in registration volume within the health &amp;
+              wellness sector this year.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+</body>
+
+</html>
