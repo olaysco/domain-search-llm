@@ -15,12 +15,15 @@ import (
 	"time"
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	"github.com/joho/godotenv"
 	domainsearch "github.com/olaysco/domain-search-llm/internal/domainsearch"
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
+	"github.com/olaysco/domain-search-llm/internal/llm"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	_ = godotenv.Load()
 	var (
 		grpcAddr  = flag.String("grpc-addr", ":9090", "address for the gRPC server")
 		httpAddr  = flag.String("http-addr", ":8080", "address for the HTTP server that hosts the UI and gRPC-Web")
@@ -36,7 +39,13 @@ func main() {
 	defer stop()
 
 	grpcServer := grpc.NewServer()
-	domainsearchv1.RegisterDomainSearchServiceServer(grpcServer, domainsearch.NewService())
+	llmConfig := &llm.Config{
+		AIEndpoint: os.Getenv("AI_ENDPOINT"),
+		AIAPIKey:   os.Getenv("AI_API_KEY"),
+		AIModel:    os.Getenv("AI_MODEL"),
+	}
+	suggesterService := llm.NewLLMSuggester(*llmConfig)
+	domainsearchv1.RegisterDomainSearchServiceServer(grpcServer, domainsearch.NewSearchService(suggesterService))
 
 	grpcLis, err := net.Listen("tcp", *grpcAddr)
 	if err != nil {
