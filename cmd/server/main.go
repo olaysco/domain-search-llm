@@ -19,15 +19,19 @@ import (
 	domainsearch "github.com/olaysco/domain-search-llm/internal/domainsearch"
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
 	"github.com/olaysco/domain-search-llm/internal/llm"
+	"github.com/olaysco/domain-search-llm/internal/provider"
+	pricepb "github.com/openprovider/contracts/v2/product/price"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
 	_ = godotenv.Load()
 	var (
 		grpcAddr  = flag.String("grpc-addr", ":9090", "address for the gRPC server")
-		httpAddr  = flag.String("http-addr", ":8080", "address for the HTTP server that hosts the UI and gRPC-Web")
+		httpAddr  = flag.String("http-addr", ":8010", "address for the HTTP server that hosts the UI and gRPC-Web")
 		staticDir = flag.String("static-dir", "web", "directory that holds the static web assets")
+		priceAddr = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", "localhost:8002"), "address for the upstream price gRPC service")
 	)
 	flag.Parse()
 
@@ -37,6 +41,15 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if *priceAddr == "" {
+		log.Fatal("price service address is not configured (set --price-addr or PRICE_SERVICE_ADDR)")
+	}
+	priceConn, err := grpc.NewClient(*priceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("connect to price service: %v", err)
+	}
+	defer priceConn.Close()
+	priceSvc := provider.NewPriceService(pricepb.NewPriceServiceClient(priceConn))
 
 	grpcServer := grpc.NewServer()
 	llmConfig := &llm.Config{
@@ -45,7 +58,7 @@ func main() {
 		AIModel:    os.Getenv("AI_MODEL"),
 	}
 	suggesterService := llm.NewLLMSuggester(*llmConfig)
-	domainsearchv1.RegisterDomainSearchServiceServer(grpcServer, domainsearch.NewSearchService(suggesterService))
+	domainsearchv1.RegisterDomainSearchServiceServer(grpcServer, domainsearch.NewSearchService(suggesterService, priceSvc))
 
 	grpcLis, err := net.Listen("tcp", *grpcAddr)
 	if err != nil {
@@ -132,4 +145,11 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		log.Printf("%s %s (%s)", r.Method, r.URL.Path, time.Since(start))
 	})
+}
+
+func envOrDefault(key, fallback string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return fallback
 }

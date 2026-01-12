@@ -52,15 +52,18 @@ message DomainPriceFilter {
 
 // The response from SearchPrices method.
 message SearchPricesResponse {
-  // Requested product's unique identifier.
-  string product_id = 1;
+  // Requested domain name.
+  string domain = 1;
+
+  // Similarity to the user query.
+  string similarityScore = 2;
 
   oneof response {
     // The response with product's price.
-    PriceData price = 2;
+    PriceData price = 3;
 
     // The status of the response.
-    google.rpc.Status error = 3;
+    google.rpc.Status error = 4;
   }
 }
 

@@ -266,8 +266,10 @@ func (*DomainPriceFilter_IncludedTldNames) isDomainPriceFilter_TldFilter() {}
 // The response from SearchPrices method.
 type SearchPricesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Requested product's unique identifier.
-	ProductId string `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	// Requested domain name.
+	Domain string `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
+	// Similarity to the user query.
+	SimilarityScore string `protobuf:"bytes,2,opt,name=similarityScore,proto3" json:"similarityScore,omitempty"`
 	// Types that are valid to be assigned to Response:
 	//
 	//	*SearchPricesResponse_Price
@@ -307,9 +309,16 @@ func (*SearchPricesResponse) Descriptor() ([]byte, []int) {
 	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *SearchPricesResponse) GetProductId() string {
+func (x *SearchPricesResponse) GetDomain() string {
 	if x != nil {
-		return x.ProductId
+		return x.Domain
+	}
+	return ""
+}
+
+func (x *SearchPricesResponse) GetSimilarityScore() string {
+	if x != nil {
+		return x.SimilarityScore
 	}
 	return ""
 }
@@ -345,12 +354,12 @@ type isSearchPricesResponse_Response interface {
 
 type SearchPricesResponse_Price struct {
 	// The response with product's price.
-	Price *PriceData `protobuf:"bytes,2,opt,name=price,proto3,oneof"`
+	Price *PriceData `protobuf:"bytes,3,opt,name=price,proto3,oneof"`
 }
 
 type SearchPricesResponse_Error struct {
 	// The status of the response.
-	Error *status.Status `protobuf:"bytes,3,opt,name=error,proto3,oneof"`
+	Error *status.Status `protobuf:"bytes,4,opt,name=error,proto3,oneof"`
 }
 
 func (*SearchPricesResponse_Price) isSearchPricesResponse_Response() {}
@@ -722,12 +731,12 @@ const file_domainsearch_v1_service_proto_rawDesc = "" +
 	"\bquantity\x18\x01 \x01(\v2\x1c.google.protobuf.UInt32ValueR\bquantity\x12,\n" +
 	"\x10excludedTldNames\x18\x02 \x01(\tH\x00R\x10excludedTldNames\x12,\n" +
 	"\x10includedTldNames\x18\x03 \x01(\tH\x00R\x10includedTldNamesB\v\n" +
-	"\ttldFilter\"\xa1\x01\n" +
-	"\x14SearchPricesResponse\x12\x1d\n" +
-	"\n" +
-	"product_id\x18\x01 \x01(\tR\tproductId\x122\n" +
-	"\x05price\x18\x02 \x01(\v2\x1a.domainsearch.v1.PriceDataH\x00R\x05price\x12*\n" +
-	"\x05error\x18\x03 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\n" +
+	"\ttldFilter\"\xc4\x01\n" +
+	"\x14SearchPricesResponse\x12\x16\n" +
+	"\x06domain\x18\x01 \x01(\tR\x06domain\x12(\n" +
+	"\x0fsimilarityScore\x18\x02 \x01(\tR\x0fsimilarityScore\x122\n" +
+	"\x05price\x18\x03 \x01(\v2\x1a.domainsearch.v1.PriceDataH\x00R\x05price\x12*\n" +
+	"\x05error\x18\x04 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\n" +
 	"\n" +
 	"\bresponse\"\xa5\x01\n" +
 	"\tPriceData\x12>\n" +
