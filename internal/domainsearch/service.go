@@ -62,8 +62,10 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 				if resp == nil {
 					return nil
 				}
-				resp.SimilarityScore = fmt.Sprintf("%.2f", suggestion.Score)
-				fmt.Println(resp)
+				if price := resp.GetPrice(); price != nil {
+					price.SimilarityScore = suggestion.Score
+					fmt.Println(price)
+				}
 				return stream.Send(resp)
 			}); err != nil && !errors.Is(err, context.Canceled) {
 				select {

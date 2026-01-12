@@ -10,7 +10,6 @@ import (
 	status "google.golang.org/genproto/googleapis/rpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
@@ -266,10 +265,6 @@ func (*DomainPriceFilter_IncludedTldNames) isDomainPriceFilter_TldFilter() {}
 // The response from SearchPrices method.
 type SearchPricesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Requested domain name.
-	Domain string `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
-	// Similarity to the user query.
-	SimilarityScore string `protobuf:"bytes,2,opt,name=similarityScore,proto3" json:"similarityScore,omitempty"`
 	// Types that are valid to be assigned to Response:
 	//
 	//	*SearchPricesResponse_Price
@@ -309,20 +304,6 @@ func (*SearchPricesResponse) Descriptor() ([]byte, []int) {
 	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *SearchPricesResponse) GetDomain() string {
-	if x != nil {
-		return x.Domain
-	}
-	return ""
-}
-
-func (x *SearchPricesResponse) GetSimilarityScore() string {
-	if x != nil {
-		return x.SimilarityScore
-	}
-	return ""
-}
-
 func (x *SearchPricesResponse) GetResponse() isSearchPricesResponse_Response {
 	if x != nil {
 		return x.Response
@@ -330,7 +311,7 @@ func (x *SearchPricesResponse) GetResponse() isSearchPricesResponse_Response {
 	return nil
 }
 
-func (x *SearchPricesResponse) GetPrice() *PriceData {
+func (x *SearchPricesResponse) GetPrice() *Price {
 	if x != nil {
 		if x, ok := x.Response.(*SearchPricesResponse_Price); ok {
 			return x.Price
@@ -354,259 +335,44 @@ type isSearchPricesResponse_Response interface {
 
 type SearchPricesResponse_Price struct {
 	// The response with product's price.
-	Price *PriceData `protobuf:"bytes,3,opt,name=price,proto3,oneof"`
+	Price *Price `protobuf:"bytes,1,opt,name=price,proto3,oneof"`
 }
 
 type SearchPricesResponse_Error struct {
 	// The status of the response.
-	Error *status.Status `protobuf:"bytes,4,opt,name=error,proto3,oneof"`
+	Error *status.Status `protobuf:"bytes,2,opt,name=error,proto3,oneof"`
 }
 
 func (*SearchPricesResponse_Price) isSearchPricesResponse_Response() {}
 
 func (*SearchPricesResponse_Error) isSearchPricesResponse_Response() {}
 
-// The data related with prices.
-type PriceData struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The map of prices. The key is the type of price. The value is the PriceType object.
-	// Considered keys:
-	// REQUESTED_CURRENCY - current price in requested currency including all discounts (membership, promotions).
-	// If currency doesn't specified in request, here will be price in product currency.
-	// PRODUCT_CURRENCY - current price in product currency including all discounts (membership, promotions).
-	// NON_PROMO_REQUESTED_CURRENCY - price in requested currency without any promotions.
-	// NON_PROMO_PRODUCT_CURRENCY - price in product currency without any promotions.
-	Prices        map[string]*ProductPrice `protobuf:"bytes,1,rep,name=prices,proto3" json:"prices,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PriceData) Reset() {
-	*x = PriceData{}
-	mi := &file_domainsearch_v1_service_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PriceData) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PriceData) ProtoMessage() {}
-
-func (x *PriceData) ProtoReflect() protoreflect.Message {
-	mi := &file_domainsearch_v1_service_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PriceData.ProtoReflect.Descriptor instead.
-func (*PriceData) Descriptor() ([]byte, []int) {
-	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *PriceData) GetPrices() map[string]*ProductPrice {
-	if x != nil {
-		return x.Prices
-	}
-	return nil
-}
-
-type Promotion struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The period of the promotion actuality.
-	Period        *PromotionPeriod `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Promotion) Reset() {
-	*x = Promotion{}
-	mi := &file_domainsearch_v1_service_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Promotion) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Promotion) ProtoMessage() {}
-
-func (x *Promotion) ProtoReflect() protoreflect.Message {
-	mi := &file_domainsearch_v1_service_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Promotion.ProtoReflect.Descriptor instead.
-func (*Promotion) Descriptor() ([]byte, []int) {
-	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *Promotion) GetPeriod() *PromotionPeriod {
-	if x != nil {
-		return x.Period
-	}
-	return nil
-}
-
-// The duration of the promotion.
-type PromotionPeriod struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Promotion start date.
-	From *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`
-	// Promotion end date.
-	To            *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PromotionPeriod) Reset() {
-	*x = PromotionPeriod{}
-	mi := &file_domainsearch_v1_service_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PromotionPeriod) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PromotionPeriod) ProtoMessage() {}
-
-func (x *PromotionPeriod) ProtoReflect() protoreflect.Message {
-	mi := &file_domainsearch_v1_service_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PromotionPeriod.ProtoReflect.Descriptor instead.
-func (*PromotionPeriod) Descriptor() ([]byte, []int) {
-	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *PromotionPeriod) GetFrom() *timestamppb.Timestamp {
-	if x != nil {
-		return x.From
-	}
-	return nil
-}
-
-func (x *PromotionPeriod) GetTo() *timestamppb.Timestamp {
-	if x != nil {
-		return x.To
-	}
-	return nil
-}
-
-// The price type.
-type ProductPrice struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The price amount.
-	Price *Price `protobuf:"bytes,1,opt,name=price,proto3" json:"price,omitempty"`
-	// The promotion information.
-	Promotion *Promotion `protobuf:"bytes,2,opt,name=promotion,proto3" json:"promotion,omitempty"`
-	// Any labels related with price. For example, here could be "premium" label.
-	Labels        []string `protobuf:"bytes,3,rep,name=labels,proto3" json:"labels,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ProductPrice) Reset() {
-	*x = ProductPrice{}
-	mi := &file_domainsearch_v1_service_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProductPrice) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProductPrice) ProtoMessage() {}
-
-func (x *ProductPrice) ProtoReflect() protoreflect.Message {
-	mi := &file_domainsearch_v1_service_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProductPrice.ProtoReflect.Descriptor instead.
-func (*ProductPrice) Descriptor() ([]byte, []int) {
-	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *ProductPrice) GetPrice() *Price {
-	if x != nil {
-		return x.Price
-	}
-	return nil
-}
-
-func (x *ProductPrice) GetPromotion() *Promotion {
-	if x != nil {
-		return x.Promotion
-	}
-	return nil
-}
-
-func (x *ProductPrice) GetLabels() []string {
-	if x != nil {
-		return x.Labels
-	}
-	return nil
-}
-
-// The price for the product.
+// The normalized price payload returned by the service.
 type Price struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The three-letter currency code defined in ISO 4217.
-	// For example, "USD", "EUR" etc.
-	CurrencyCode string `protobuf:"bytes,1,opt,name=currency_code,json=currencyCode,proto3" json:"currency_code,omitempty"`
-	// The whole units of the amount.
-	// For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
-	Units int64 `protobuf:"varint,2,opt,name=units,proto3" json:"units,omitempty"`
-	// Number of nano (10^-9) units of the amount.
-	// The value must be between -999,999,999 and +999,999,999 inclusive.
-	// If `units` is positive, `nanos` must be positive or zero.
-	// If `units` is zero, `nanos` can be positive, zero, or negative.
-	// If `units` is negative, `nanos` must be negative or zero.
-	// For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
-	Nanos int32 `protobuf:"varint,3,opt,name=nanos,proto3" json:"nanos,omitempty"`
-	// The amount of the price. For example, for `units`=1 and `nanos`=230,000,000 the value will be "1.23".
-	Value         string `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
+	// Promotion is promotion available.
+	Promotion bool `protobuf:"varint,1,opt,name=promotion,proto3" json:"promotion,omitempty"`
+	// Cost is cost value.
+	Cost float32 `protobuf:"fixed32,2,opt,name=cost,proto3" json:"cost,omitempty"`
+	// The 3-letter currency code defined in ISO 4217.
+	Currency string `protobuf:"bytes,3,opt,name=currency,proto3" json:"currency,omitempty"`
+	// Domain is full domain name with TLD.
+	Domain string `protobuf:"bytes,4,opt,name=domain,proto3" json:"domain,omitempty"`
+	// Labels is array of domain labels.
+	Labels []string `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty"`
+	// Availability indicates if the domain is available for purchase.
+	Availability bool `protobuf:"varint,6,opt,name=availability,proto3" json:"availability,omitempty"`
+	// Similarity score of the suggestion compared to the query.
+	SimilarityScore float64 `protobuf:"fixed64,7,opt,name=similarity_score,json=similarityScore,proto3" json:"similarity_score,omitempty"`
+	// Renewal cost is approximate renewal price for the domain.
+	RenewalCost   float32 `protobuf:"fixed32,8,opt,name=renewal_cost,json=renewalCost,proto3" json:"renewal_cost,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Price) Reset() {
 	*x = Price{}
-	mi := &file_domainsearch_v1_service_proto_msgTypes[8]
+	mi := &file_domainsearch_v1_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -618,7 +384,7 @@ func (x *Price) String() string {
 func (*Price) ProtoMessage() {}
 
 func (x *Price) ProtoReflect() protoreflect.Message {
-	mi := &file_domainsearch_v1_service_proto_msgTypes[8]
+	mi := &file_domainsearch_v1_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -631,35 +397,63 @@ func (x *Price) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Price.ProtoReflect.Descriptor instead.
 func (*Price) Descriptor() ([]byte, []int) {
-	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{8}
+	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *Price) GetCurrencyCode() string {
+func (x *Price) GetPromotion() bool {
 	if x != nil {
-		return x.CurrencyCode
+		return x.Promotion
 	}
-	return ""
+	return false
 }
 
-func (x *Price) GetUnits() int64 {
+func (x *Price) GetCost() float32 {
 	if x != nil {
-		return x.Units
-	}
-	return 0
-}
-
-func (x *Price) GetNanos() int32 {
-	if x != nil {
-		return x.Nanos
+		return x.Cost
 	}
 	return 0
 }
 
-func (x *Price) GetValue() string {
+func (x *Price) GetCurrency() string {
 	if x != nil {
-		return x.Value
+		return x.Currency
 	}
 	return ""
+}
+
+func (x *Price) GetDomain() string {
+	if x != nil {
+		return x.Domain
+	}
+	return ""
+}
+
+func (x *Price) GetLabels() []string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+func (x *Price) GetAvailability() bool {
+	if x != nil {
+		return x.Availability
+	}
+	return false
+}
+
+func (x *Price) GetSimilarityScore() float64 {
+	if x != nil {
+		return x.SimilarityScore
+	}
+	return 0
+}
+
+func (x *Price) GetRenewalCost() float32 {
+	if x != nil {
+		return x.RenewalCost
+	}
+	return 0
 }
 
 type DomainSuggestion struct {
@@ -672,7 +466,7 @@ type DomainSuggestion struct {
 
 func (x *DomainSuggestion) Reset() {
 	*x = DomainSuggestion{}
-	mi := &file_domainsearch_v1_service_proto_msgTypes[9]
+	mi := &file_domainsearch_v1_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -684,7 +478,7 @@ func (x *DomainSuggestion) String() string {
 func (*DomainSuggestion) ProtoMessage() {}
 
 func (x *DomainSuggestion) ProtoReflect() protoreflect.Message {
-	mi := &file_domainsearch_v1_service_proto_msgTypes[9]
+	mi := &file_domainsearch_v1_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -697,7 +491,7 @@ func (x *DomainSuggestion) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DomainSuggestion.ProtoReflect.Descriptor instead.
 func (*DomainSuggestion) Descriptor() ([]byte, []int) {
-	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{9}
+	return file_domainsearch_v1_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DomainSuggestion) GetDomain() string {
@@ -718,7 +512,7 @@ var File_domainsearch_v1_service_proto protoreflect.FileDescriptor
 
 const file_domainsearch_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1ddomainsearch/v1/service.proto\x12\x0fdomainsearch.v1\x1a\x17google/rpc/status.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa0\x01\n" +
+	"\x1ddomainsearch/v1/service.proto\x12\x0fdomainsearch.v1\x1a\x17google/rpc/status.proto\x1a\x1egoogle/protobuf/wrappers.proto\"\xa0\x01\n" +
 	"\x13SearchPricesRequest\x12\x18\n" +
 	"\aproduct\x18\x01 \x01(\tR\aproduct\x12\x14\n" +
 	"\x05query\x18\x02 \x01(\tR\x05query\x12#\n" +
@@ -731,33 +525,21 @@ const file_domainsearch_v1_service_proto_rawDesc = "" +
 	"\bquantity\x18\x01 \x01(\v2\x1c.google.protobuf.UInt32ValueR\bquantity\x12,\n" +
 	"\x10excludedTldNames\x18\x02 \x01(\tH\x00R\x10excludedTldNames\x12,\n" +
 	"\x10includedTldNames\x18\x03 \x01(\tH\x00R\x10includedTldNamesB\v\n" +
-	"\ttldFilter\"\xc4\x01\n" +
-	"\x14SearchPricesResponse\x12\x16\n" +
-	"\x06domain\x18\x01 \x01(\tR\x06domain\x12(\n" +
-	"\x0fsimilarityScore\x18\x02 \x01(\tR\x0fsimilarityScore\x122\n" +
-	"\x05price\x18\x03 \x01(\v2\x1a.domainsearch.v1.PriceDataH\x00R\x05price\x12*\n" +
-	"\x05error\x18\x04 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\n" +
+	"\ttldFilter\"~\n" +
+	"\x14SearchPricesResponse\x12.\n" +
+	"\x05price\x18\x01 \x01(\v2\x16.domainsearch.v1.PriceH\x00R\x05price\x12*\n" +
+	"\x05error\x18\x02 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\n" +
 	"\n" +
-	"\bresponse\"\xa5\x01\n" +
-	"\tPriceData\x12>\n" +
-	"\x06prices\x18\x01 \x03(\v2&.domainsearch.v1.PriceData.PricesEntryR\x06prices\x1aX\n" +
-	"\vPricesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x123\n" +
-	"\x05value\x18\x02 \x01(\v2\x1d.domainsearch.v1.ProductPriceR\x05value:\x028\x01\"E\n" +
-	"\tPromotion\x128\n" +
-	"\x06period\x18\x01 \x01(\v2 .domainsearch.v1.PromotionPeriodR\x06period\"m\n" +
-	"\x0fPromotionPeriod\x12.\n" +
-	"\x04from\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
-	"\x02to\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\x8e\x01\n" +
-	"\fProductPrice\x12,\n" +
-	"\x05price\x18\x01 \x01(\v2\x16.domainsearch.v1.PriceR\x05price\x128\n" +
-	"\tpromotion\x18\x02 \x01(\v2\x1a.domainsearch.v1.PromotionR\tpromotion\x12\x16\n" +
-	"\x06labels\x18\x03 \x03(\tR\x06labels\"n\n" +
-	"\x05Price\x12#\n" +
-	"\rcurrency_code\x18\x01 \x01(\tR\fcurrencyCode\x12\x14\n" +
-	"\x05units\x18\x02 \x01(\x03R\x05units\x12\x14\n" +
-	"\x05nanos\x18\x03 \x01(\x05R\x05nanos\x12\x14\n" +
-	"\x05value\x18\x04 \x01(\tR\x05value\"H\n" +
+	"\bresponse\"\xf7\x01\n" +
+	"\x05Price\x12\x1c\n" +
+	"\tpromotion\x18\x01 \x01(\bR\tpromotion\x12\x12\n" +
+	"\x04cost\x18\x02 \x01(\x02R\x04cost\x12\x1a\n" +
+	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12\x16\n" +
+	"\x06domain\x18\x04 \x01(\tR\x06domain\x12\x16\n" +
+	"\x06labels\x18\x05 \x03(\tR\x06labels\x12\"\n" +
+	"\favailability\x18\x06 \x01(\bR\favailability\x12)\n" +
+	"\x10similarity_score\x18\a \x01(\x01R\x0fsimilarityScore\x12!\n" +
+	"\frenewal_cost\x18\b \x01(\x02R\vrenewalCost\"H\n" +
 	"\x10DomainSuggestion\x12\x16\n" +
 	"\x06domain\x18\x01 \x01(\tR\x06domain\x12\x1c\n" +
 	"\tavailable\x18\x02 \x01(\bR\tavailable2r\n" +
@@ -777,43 +559,30 @@ func file_domainsearch_v1_service_proto_rawDescGZIP() []byte {
 	return file_domainsearch_v1_service_proto_rawDescData
 }
 
-var file_domainsearch_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_domainsearch_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_domainsearch_v1_service_proto_goTypes = []any{
 	(*SearchPricesRequest)(nil),    // 0: domainsearch.v1.SearchPricesRequest
 	(*PriceFilter)(nil),            // 1: domainsearch.v1.PriceFilter
 	(*DomainPriceFilter)(nil),      // 2: domainsearch.v1.DomainPriceFilter
 	(*SearchPricesResponse)(nil),   // 3: domainsearch.v1.SearchPricesResponse
-	(*PriceData)(nil),              // 4: domainsearch.v1.PriceData
-	(*Promotion)(nil),              // 5: domainsearch.v1.Promotion
-	(*PromotionPeriod)(nil),        // 6: domainsearch.v1.PromotionPeriod
-	(*ProductPrice)(nil),           // 7: domainsearch.v1.ProductPrice
-	(*Price)(nil),                  // 8: domainsearch.v1.Price
-	(*DomainSuggestion)(nil),       // 9: domainsearch.v1.DomainSuggestion
-	nil,                            // 10: domainsearch.v1.PriceData.PricesEntry
-	(*wrapperspb.UInt32Value)(nil), // 11: google.protobuf.UInt32Value
-	(*status.Status)(nil),          // 12: google.rpc.Status
-	(*timestamppb.Timestamp)(nil),  // 13: google.protobuf.Timestamp
+	(*Price)(nil),                  // 4: domainsearch.v1.Price
+	(*DomainSuggestion)(nil),       // 5: domainsearch.v1.DomainSuggestion
+	(*wrapperspb.UInt32Value)(nil), // 6: google.protobuf.UInt32Value
+	(*status.Status)(nil),          // 7: google.rpc.Status
 }
 var file_domainsearch_v1_service_proto_depIdxs = []int32{
-	1,  // 0: domainsearch.v1.SearchPricesRequest.filter:type_name -> domainsearch.v1.PriceFilter
-	2,  // 1: domainsearch.v1.PriceFilter.domain:type_name -> domainsearch.v1.DomainPriceFilter
-	11, // 2: domainsearch.v1.DomainPriceFilter.quantity:type_name -> google.protobuf.UInt32Value
-	4,  // 3: domainsearch.v1.SearchPricesResponse.price:type_name -> domainsearch.v1.PriceData
-	12, // 4: domainsearch.v1.SearchPricesResponse.error:type_name -> google.rpc.Status
-	10, // 5: domainsearch.v1.PriceData.prices:type_name -> domainsearch.v1.PriceData.PricesEntry
-	6,  // 6: domainsearch.v1.Promotion.period:type_name -> domainsearch.v1.PromotionPeriod
-	13, // 7: domainsearch.v1.PromotionPeriod.from:type_name -> google.protobuf.Timestamp
-	13, // 8: domainsearch.v1.PromotionPeriod.to:type_name -> google.protobuf.Timestamp
-	8,  // 9: domainsearch.v1.ProductPrice.price:type_name -> domainsearch.v1.Price
-	5,  // 10: domainsearch.v1.ProductPrice.promotion:type_name -> domainsearch.v1.Promotion
-	7,  // 11: domainsearch.v1.PriceData.PricesEntry.value:type_name -> domainsearch.v1.ProductPrice
-	0,  // 12: domainsearch.v1.DomainSearchService.CheckPrice:input_type -> domainsearch.v1.SearchPricesRequest
-	3,  // 13: domainsearch.v1.DomainSearchService.CheckPrice:output_type -> domainsearch.v1.SearchPricesResponse
-	13, // [13:14] is the sub-list for method output_type
-	12, // [12:13] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	1, // 0: domainsearch.v1.SearchPricesRequest.filter:type_name -> domainsearch.v1.PriceFilter
+	2, // 1: domainsearch.v1.PriceFilter.domain:type_name -> domainsearch.v1.DomainPriceFilter
+	6, // 2: domainsearch.v1.DomainPriceFilter.quantity:type_name -> google.protobuf.UInt32Value
+	4, // 3: domainsearch.v1.SearchPricesResponse.price:type_name -> domainsearch.v1.Price
+	7, // 4: domainsearch.v1.SearchPricesResponse.error:type_name -> google.rpc.Status
+	0, // 5: domainsearch.v1.DomainSearchService.CheckPrice:input_type -> domainsearch.v1.SearchPricesRequest
+	3, // 6: domainsearch.v1.DomainSearchService.CheckPrice:output_type -> domainsearch.v1.SearchPricesResponse
+	6, // [6:7] is the sub-list for method output_type
+	5, // [5:6] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_domainsearch_v1_service_proto_init() }
@@ -838,7 +607,7 @@ func file_domainsearch_v1_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_domainsearch_v1_service_proto_rawDesc), len(file_domainsearch_v1_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

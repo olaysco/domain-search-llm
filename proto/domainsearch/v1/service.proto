@@ -4,7 +4,6 @@ package domainsearch.v1;
 
 import "google/rpc/status.proto";
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1;domainsearchv1";
 
@@ -52,81 +51,41 @@ message DomainPriceFilter {
 
 // The response from SearchPrices method.
 message SearchPricesResponse {
-  // Requested domain name.
-  string domain = 1;
-
-  // Similarity to the user query.
-  string similarityScore = 2;
-
   oneof response {
     // The response with product's price.
-    PriceData price = 3;
+    Price price = 1;
 
     // The status of the response.
-    google.rpc.Status error = 4;
+    google.rpc.Status error = 2;
   }
 }
 
-// The data related with prices.
-message PriceData {
-  // The map of prices. The key is the type of price. The value is the PriceType object.
-  // Considered keys:
-  // REQUESTED_CURRENCY - current price in requested currency including all discounts (membership, promotions).
-  // If currency doesn't specified in request, here will be price in product currency.
-  // PRODUCT_CURRENCY - current price in product currency including all discounts (membership, promotions).
-  // NON_PROMO_REQUESTED_CURRENCY - price in requested currency without any promotions.
-  // NON_PROMO_PRODUCT_CURRENCY - price in product currency without any promotions.
-  map <string, ProductPrice> prices = 1;
-}
-
-message Promotion {
-  // The period of the promotion actuality.
-  PromotionPeriod period = 1;
-}
-
-// The duration of the promotion.
-message PromotionPeriod {
-  // Promotion start date.
-  google.protobuf.Timestamp from = 1;
-
-  // Promotion end date.
-  google.protobuf.Timestamp to = 2;
-}
-
-// The price type.
-message ProductPrice {
-  // The price amount.
-  Price price = 1;
-
-  // The promotion information.
-  Promotion promotion = 2;
-
-  // Any labels related with price. For example, here could be "premium" label.
-  repeated string labels = 3;
-}
-
-// The price for the product.
+// The normalized price payload returned by the service.
 message Price {
-  // The three-letter currency code defined in ISO 4217.
-  // For example, "USD", "EUR" etc.
-  string currency_code = 1;
+  // Promotion is promotion available.
+  bool promotion = 1;
 
-  // The whole units of the amount.
-  // For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
-  int64 units = 2;
+  // Cost is cost value.
+  float cost = 2;
 
-  // Number of nano (10^-9) units of the amount.
-  // The value must be between -999,999,999 and +999,999,999 inclusive.
-  // If `units` is positive, `nanos` must be positive or zero.
-  // If `units` is zero, `nanos` can be positive, zero, or negative.
-  // If `units` is negative, `nanos` must be negative or zero.
-  // For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
-  int32 nanos = 3;
+  // The 3-letter currency code defined in ISO 4217.
+  string currency = 3;
 
-  // The amount of the price. For example, for `units`=1 and `nanos`=230,000,000 the value will be "1.23".
-  string value = 4;
+  // Domain is full domain name with TLD.
+  string domain = 4;
+
+  // Labels is array of domain labels.
+  repeated string labels = 5;
+
+  // Availability indicates if the domain is available for purchase.
+  bool availability = 6;
+
+  // Similarity score of the suggestion compared to the query.
+  double similarity_score = 7;
+
+  // Renewal cost is approximate renewal price for the domain.
+  float renewal_cost = 8;
 }
-
 
 message DomainSuggestion {
   string domain = 1;

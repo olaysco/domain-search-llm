@@ -67,6 +67,23 @@
                         radial-gradient(circle at bottom left, #f8fafd 0%, #ffffff 100%);
         }
     </style>
+  <style>
+    #status[data-variant="info"] {
+      color: #0369a1;
+    }
+
+    #status[data-variant="success"] {
+      color: #15803d;
+    }
+
+    #status[data-variant="warning"] {
+      color: #a16207;
+    }
+
+    #status[data-variant="error"] {
+      color: #b91c1c;
+    }
+  </style>
 </head>
 
 <body class="bg-op-gray-light text-op-text min-h-screen gradient-bg">
@@ -104,7 +121,7 @@
           Describe your project in plain English. Our AI analyzes your needs to suggest high-impact domain names and TLD
           strategies.
         </p>
-        <div class="w-full max-w-3xl relative group">
+        <form id="search-form" class="w-full max-w-3xl relative group">
           <div
             class="relative flex items-center bg-white p-1.5 rounded-xl border-2 border-slate-200 focus-within:border-op-blue shadow-lg transition-all">
             <div class="pl-4 pr-2 text-slate-400">
@@ -112,14 +129,20 @@
             </div>
             <input
               class="flex-1 bg-transparent border-none focus:ring-0 text-lg py-4 placeholder:text-slate-400 font-medium"
-              placeholder="Describe your business idea (e.g. eco-friendly yoga studio in Amsterdam)" type="text" />
-            <button
+              id="query"
+              name="query"
+              type="text"
+              autocomplete="off"
+              required
+              placeholder="Describe your business idea (e.g. eco-friendly yoga studio in Amsterdam)" />
+            <button type="submit"
               class="bg-op-blue hover:bg-blue-700 text-white font-bold px-10 py-4 rounded-lg flex items-center gap-2 transition-all shadow-md">
               <span>Search</span>
               <span class="material-symbols-outlined text-sm">search</span>
             </button>
           </div>
-        </div>
+          <p id="status" role="status" class="mt-4 text-sm font-semibold text-slate-500 text-left"></p>
+        </form>
         <div class="flex flex-wrap justify-center gap-3 mt-8">
           <button
             class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all">
@@ -142,6 +165,15 @@
             class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all">
             Catchy
           </button>
+        </div>
+      </section>
+      <section id="results" class="hidden mt-12">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <h3 class="text-2xl font-extrabold text-slate-900">Live price stream</h3>
+            <span class="text-xs font-bold tracking-widest uppercase text-op-blue bg-blue-50 px-3 py-1 rounded-full">Streaming</span>
+          </div>
+          <div id="suggestions" class="flex flex-col gap-6" aria-live="polite"></div>
         </div>
       </section>
       <div class="flex flex-col lg:flex-row gap-10">
@@ -367,6 +399,7 @@
     </main>
   </div>
 
+  <script type="module" src="./app.js"></script>
 </body>
 
 </html>

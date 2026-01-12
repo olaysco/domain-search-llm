@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
@@ -83,60 +84,67 @@ func fromPriceSearchResponse(req string, resp *pricepb.SearchPricesResponse) *do
 	if resp == nil {
 		return nil
 	}
-	out := &domainsearchv1.SearchPricesResponse{Domain: req}
+	out := &domainsearchv1.SearchPricesResponse{}
 	switch payload := resp.GetResponse().(type) {
 	case *pricepb.SearchPricesResponse_Price:
-		out.Response = &domainsearchv1.SearchPricesResponse_Price{Price: fromPriceData(payload.Price)}
+		if price := normalizePrice(req, payload.Price); price != nil {
+			out.Response = &domainsearchv1.SearchPricesResponse_Price{Price: price}
+		} else {
+			return nil
+		}
 	case *pricepb.SearchPricesResponse_Error:
 		out.Response = &domainsearchv1.SearchPricesResponse_Error{Error: payload.Error}
 	}
 	return out
 }
 
-func fromPriceData(data *pricepb.PriceData) *domainsearchv1.PriceData {
-	if data == nil {
+var (
+	registrationPricePriority = "REQUESTED_CURRENCY"
+	renewalPricePriority      = "RENEWAL_REQUESTED_CURRENCY"
+)
+
+func normalizePrice(domain string, data *pricepb.PriceData) *domainsearchv1.Price {
+	if data == nil || len(data.Prices) == 0 {
 		return nil
 	}
-	prices := make(map[string]*domainsearchv1.ProductPrice, len(data.Prices))
-	for key, value := range data.Prices {
-		prices[key] = fromProductPrice(value)
+	registration := pickProductPrice(data.Prices, registrationPricePriority)
+	renewal := pickProductPrice(data.Prices, renewalPricePriority)
+	price := &domainsearchv1.Price{
+		Domain:       domain,
+		Availability: true,
 	}
-	return &domainsearchv1.PriceData{Prices: prices}
+	price.Currency = registration.GetPrice().GetCurrencyCode()
+	price.Cost = toAmount(registration.GetPrice())
+	price.Promotion = registration.GetPromotion() != nil
+	price.Labels = append([]string(nil), registration.Labels...)
+	price.RenewalCost = toAmount(renewal.GetPrice())
+
+	return price
 }
 
-func fromProductPrice(price *pricepb.ProductPrice) *domainsearchv1.ProductPrice {
+func pickProductPrice(source map[string]*pricepb.ProductPrice, key string) *pricepb.ProductPrice {
+	if val := source[key]; val != nil {
+		return val
+	}
+
+	for _, val := range source {
+		if val != nil {
+			return val
+		}
+	}
+	return nil
+}
+
+func toAmount(price *pricepb.Price) float32 {
 	if price == nil {
-		return nil
+		return 0
 	}
-	return &domainsearchv1.ProductPrice{
-		Price:     fromPrice(price.Price),
-		Promotion: fromPromotion(price.Promotion),
-		Labels:    append([]string(nil), price.Labels...),
+	if val := price.GetValue(); val != "" {
+		if parsed, err := strconv.ParseFloat(val, 32); err == nil {
+			return float32(parsed)
+		}
 	}
-}
-
-func fromPrice(price *pricepb.Price) *domainsearchv1.Price {
-	if price == nil {
-		return nil
-	}
-	return &domainsearchv1.Price{
-		CurrencyCode: price.GetCurrencyCode(),
-		Value:        price.GetValue(),
-	}
-}
-
-func fromPromotion(promo *pricepb.Promotion) *domainsearchv1.Promotion {
-	if promo == nil {
-		return nil
-	}
-	return &domainsearchv1.Promotion{Period: fromPromotionPeriod(promo.Period)}
-}
-
-func fromPromotionPeriod(period *pricepb.PromotionPeriod) *domainsearchv1.PromotionPeriod {
-	if period == nil {
-		return nil
-	}
-	return &domainsearchv1.PromotionPeriod{From: period.GetFrom(), To: period.GetTo()}
+	return float32(price.GetUnits()) + float32(price.GetNanos())/1e9
 }
 
 func extractTLD(domain string) (string, string) {

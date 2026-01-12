@@ -151,6 +151,18 @@ const skipField = (wireType, buffer, offset) => {
   }
 };
 
+const readFixed32 = (buffer, offset, littleEndian = true) => {
+  const view = new DataView(buffer.buffer, buffer.byteOffset + offset, 4);
+  const value = view.getFloat32(0, littleEndian);
+  return { value, nextOffset: offset + 4 };
+};
+
+const readFixed64 = (buffer, offset, littleEndian = true) => {
+  const view = new DataView(buffer.buffer, buffer.byteOffset + offset, 8);
+  const value = view.getFloat64(0, littleEndian);
+  return { value, nextOffset: offset + 8 };
+};
+
 const readBytes = (buffer, offset) => {
   const { value: length, nextOffset } = decodeVarint(buffer, offset);
   const end = nextOffset + length;
@@ -316,26 +328,60 @@ const decodePriceEntry = (buffer) => {
   return { key, value };
 };
 
-const decodePriceData = (buffer) => {
+const decodePricePayload = (buffer) => {
   let offset = 0;
-  const prices = {};
+  const price = {
+    promotion: false,
+    cost: 0,
+    currency: '',
+    domain: '',
+    labels: [],
+    availability: false,
+    similarityScore: 0,
+    renewalCost: 0
+  };
   while (offset < buffer.length) {
     const { value: tag, nextOffset } = decodeVarint(buffer, offset);
     offset = nextOffset;
     const fieldNumber = tag >>> 3;
     const wireType = tag & 0x7;
-    if (fieldNumber === 1 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
-      const { value: entryBytes, nextOffset: afterEntry } = readBytes(buffer, offset);
-      const entry = decodePriceEntry(entryBytes);
-      if (entry.key) {
-        prices[entry.key] = entry.value;
-      }
-      offset = afterEntry;
+    if (fieldNumber === 1 && wireType === WIRE_TYPE.VARINT) {
+      const { value, nextOffset: after } = decodeVarint(buffer, offset);
+      price.promotion = Boolean(value);
+      offset = after;
+    } else if (fieldNumber === 2 && wireType === WIRE_TYPE.FIXED32) {
+      const { value, nextOffset: after } = readFixed32(buffer, offset, true);
+      price.cost = value;
+      offset = after;
+    } else if (fieldNumber === 3 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
+      const { value, nextOffset: after } = readString(buffer, offset);
+      price.currency = value;
+      offset = after;
+    } else if (fieldNumber === 4 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
+      const { value, nextOffset: after } = readString(buffer, offset);
+      price.domain = value;
+      offset = after;
+    } else if (fieldNumber === 5 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
+      const { value, nextOffset: after } = readString(buffer, offset);
+      price.labels.push(value);
+      offset = after;
+    } else if (fieldNumber === 6 && wireType === WIRE_TYPE.VARINT) {
+      const { value, nextOffset: after } = decodeVarint(buffer, offset);
+      price.availability = Boolean(value);
+      offset = after;
+    } else if (fieldNumber === 7 && wireType === WIRE_TYPE.FIXED64) {
+      const { value, nextOffset: after } = readFixed64(buffer, offset, true);
+      price.similarityScore = value;
+      offset = after;
+    } else if (fieldNumber === 8 && wireType === WIRE_TYPE.FIXED32) {
+      const { value, nextOffset: after } = readFixed32(buffer, offset, true);
+      price.renewalCost = value;
+      offset = after;
     } else {
       offset = skipField(wireType, buffer, offset);
     }
   }
-  return { prices };
+  return price;
 };
 
 const decodeStatus = (buffer) => {
@@ -367,21 +413,17 @@ const decodeStatus = (buffer) => {
 
 const decodeSearchPricesResponse = (buffer) => {
   let offset = 0;
-  const response = { productId: '', priceData: null, error: null };
+  const response = { price: null, error: null };
   while (offset < buffer.length) {
     const { value: tag, nextOffset } = decodeVarint(buffer, offset);
     offset = nextOffset;
     const fieldNumber = tag >>> 3;
     const wireType = tag & 0x7;
     if (fieldNumber === 1 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
-      const { value, nextOffset: after } = readString(buffer, offset);
-      response.productId = value;
-      offset = after;
-    } else if (fieldNumber === 2 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
       const { value: priceBytes, nextOffset: afterPrice } = readBytes(buffer, offset);
-      response.priceData = decodePriceData(priceBytes);
+      response.price = decodePricePayload(priceBytes);
       offset = afterPrice;
-    } else if (fieldNumber === 3 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
+    } else if (fieldNumber === 2 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
       const { value: statusBytes, nextOffset: afterStatus } = readBytes(buffer, offset);
       response.error = decodeStatus(statusBytes);
       offset = afterStatus;
