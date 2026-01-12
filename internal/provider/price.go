@@ -36,7 +36,7 @@ func (p *PriceService) StreamPrices(ctx context.Context, req string, handler Pri
 		return fmt.Errorf("price stream handler cannot be nil")
 	}
 
-	stream, err := p.client.SearchPrices(ctx, toPriceSearchRequest(req))
+	stream, err := p.client.SearchPriceFastCheckout(ctx, toPriceSearchRequest(req))
 	if err != nil {
 		return fmt.Errorf("price service search: %w", err)
 	}

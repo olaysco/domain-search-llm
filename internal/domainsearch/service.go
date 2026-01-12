@@ -1,6 +1,8 @@
 package domainsearch
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -32,7 +34,8 @@ func NewSearchService(llmSusggester *llm.LLMSuggester, priceProvider provider.Pr
 
 // CheckPrice proxies the upstream price provider stream to the caller.
 func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stream domainsearchv1.DomainSearchService_CheckPriceServer) error {
-	ctx := stream.Context()
+	ctx, cancel := context.WithCancel(stream.Context())
+	defer cancel()
 
 	if req == nil {
 		return nil
@@ -46,25 +49,37 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 	if err != nil {
 		return err
 	}
-	fmt.Println(llmResponse)
 
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+
 	for _, suggestion := range llmResponse {
+		suggestion := suggestion
 		wg.Add(1)
 		go func() {
-			s.priceProvider.StreamPrices(ctx, suggestion.Domain, func(resp *domainsearchv1.SearchPricesResponse) error {
+			defer wg.Done()
+			if err := s.priceProvider.StreamPrices(ctx, suggestion.Domain, func(resp *domainsearchv1.SearchPricesResponse) error {
 				if resp == nil {
-					wg.Done()
 					return nil
 				}
 				resp.SimilarityScore = fmt.Sprintf("%.2f", suggestion.Score)
 				fmt.Println(resp)
-				wg.Done()
 				return stream.Send(resp)
-			})
+			}); err != nil && !errors.Is(err, context.Canceled) {
+				select {
+				case errCh <- err:
+				default:
+				}
+				cancel()
+			}
 		}()
 	}
 
 	wg.Wait()
-	return nil
+	select {
+	case err := <-errCh:
+		return err
+	default:
+		return nil
+	}
 }
