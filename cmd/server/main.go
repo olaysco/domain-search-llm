@@ -30,8 +30,8 @@ func main() {
 	var (
 		grpcAddr  = flag.String("grpc-addr", ":9090", "address for the gRPC server")
 		httpAddr  = flag.String("http-addr", ":8010", "address for the HTTP server that hosts the UI and gRPC-Web")
-		staticDir = flag.String("static-dir", "web", "directory that holds the static web assets")
-		priceAddr = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", "localhost:8002"), "address for the upstream price gRPC service")
+		staticDir = flag.String("static-dir", "web/dist", "directory that holds the built static web assets")
+		priceAddr = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", ""), "address for the upstream price gRPC service")
 	)
 	flag.Parse()
 
@@ -115,14 +115,14 @@ func main() {
 
 func ensureDir(path string) error {
 	info, err := os.Stat(path)
-	if err == nil && info.IsDir() {
-		return nil
-	}
 	if err == nil {
+		if info.IsDir() {
+			return nil
+		}
 		return fmt.Errorf("%s exists but is not a directory", path)
 	}
 	if errors.Is(err, os.ErrNotExist) {
-		return os.MkdirAll(path, 0o755)
+		return fmt.Errorf("%s does not exist; build the front-end assets first", path)
 	}
 	return err
 }
