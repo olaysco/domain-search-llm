@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -44,11 +45,14 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 	llmQuery := llm.AISuggestionRequest{
 		Query:      req.Query,
 		MaxResults: 10,
+		Context:    buildLLMContext(req),
 	}
 	llmResponse, err := s.llmSuggester.GenerateDomainSuggestions(ctx, llmQuery)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
+	fmt.Println(llmResponse)
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, 1)
@@ -84,4 +88,25 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 	default:
 		return nil
 	}
+}
+
+func buildLLMContext(req *domainsearchv1.SearchPricesRequest) map[string]interface{} {
+	if req == nil {
+		return nil
+	}
+	ctx := make(map[string]interface{})
+	if filter := req.GetFilter(); filter != nil {
+		if domain := filter.GetDomain(); domain != nil {
+			if included := strings.TrimSpace(domain.GetIncludedTldNames()); included != "" {
+				ctx["preferred_tlds"] = included
+			}
+			if excluded := strings.TrimSpace(domain.GetExcludedTldNames()); excluded != "" {
+				ctx["excluded_tlds"] = excluded
+			}
+		}
+	}
+	if len(ctx) == 0 {
+		return nil
+	}
+	return ctx
 }

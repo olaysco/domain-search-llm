@@ -83,7 +83,7 @@ func main() {
 
 	grpcLis, err := net.Listen("tcp", *grpcAddr)
 	if err != nil {
-		log.Fatal("listen gRP ", zap.Error(err))
+		log.Fatal("listen gRPC ", zap.Error(err))
 	}
 	go func() {
 		log.Info("gRPC server listening on ", zap.String("gRPC Address", *grpcAddr))

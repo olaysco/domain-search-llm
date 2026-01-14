@@ -7,7 +7,7 @@
             <span class="material-symbols-outlined text-xl">temp_preferences_custom</span>
           </div>
           <h1 class="text-xl font-extrabold tracking-tight text-slate-900">
-            OpenProvider <span class="text-op-blue">AI</span>
+            DynamicDomain <span class="text-op-blue">AI</span>
           </h1>
         </div>
         <div class="flex items-center gap-4">
@@ -55,7 +55,7 @@
                 class="bg-op-blue hover:bg-blue-700 text-white font-bold px-10 py-4 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-60"
                 :disabled="isStreaming"
               >
-                <span>{{ isStreaming ? 'Streaming…' : 'Search' }}</span>
+                <span>{{ isStreaming ? 'Searching…' : 'Search' }}</span>
                 <span class="material-symbols-outlined text-sm">search</span>
               </button>
             </div>
@@ -68,45 +68,41 @@
               <span class="material-symbols-outlined animate-spin text-base">progress_activity</span>
               <span>Looking for matching domains…</span>
             </div>
-            <p
-              v-if="statusMessage"
-              class="mt-4 text-sm font-semibold text-left status-pill"
-              :class="statusClass"
-              role="status"
-              aria-live="polite"
-            >
-              {{ statusMessage }}
-            </p>
           </form>
-          <div class="flex flex-wrap justify-center gap-3 mt-8">
-            <button
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all"
-              type="button"
-            >
-              Popular TLDs <span class="material-symbols-outlined text-sm">expand_more</span>
-            </button>
-            <button class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-op-blue text-white text-sm font-bold shadow-sm" type="button">
-              .ai <span class="material-symbols-outlined text-xs">check</span>
-            </button>
-            <button
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all"
-              type="button"
-            >
-              .com <span class="material-symbols-outlined text-sm">expand_more</span>
-            </button>
-            <div class="w-px h-8 bg-slate-300 mx-2 hidden sm:block"></div>
-            <button
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all"
-              type="button"
-            >
-              Professional
-            </button>
-            <button
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:border-op-blue transition-all"
-              type="button"
-            >
-              Catchy
-            </button>
+          <div class="w-full max-w-3xl mt-8">
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div class="text-left">
+                  <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Preferred TLDs</p>
+                  <p class="text-sm text-slate-500">Select one or more endings you'd like the AI to favor.</p>
+                </div>
+                <button
+                  v-if="selectedTlds.length"
+                  class="text-xs font-semibold text-op-blue hover:underline"
+                  type="button"
+                  @click="clearSelectedTlds"
+                >
+                  Clear selection
+                </button>
+              </div>
+              <div class="flex flex-wrap justify-center gap-3">
+                <button
+                  v-for="tld in tldOptions"
+                  :key="tld"
+                  class="flex items-center gap-2 px-5 py-2.5 rounded-lg border text-sm font-semibold transition-all"
+                  :class="isTldSelected(tld)
+                    ? 'bg-op-blue text-white border-op-blue shadow-sm'
+                    : 'bg-white border-slate-200 text-slate-700 hover:border-op-blue'"
+                  type="button"
+                  :aria-pressed="isTldSelected(tld)"
+                  @click="toggleTld(tld)"
+                >
+                  {{ tld }}
+                  <span class="material-symbols-outlined text-sm">{{ isTldSelected(tld) ? 'check' : 'add' }}</span>
+                </button>
+              </div>
+              <p class="mt-4 text-xs text-slate-500 font-medium" aria-live="polite">{{ preferredTldMessage }}</p>
+            </div>
           </div>
         </section>
 
@@ -119,9 +115,6 @@
                   {{ suggestions.length }} Domains
                 </span>
               </h3>
-              <p class="text-sm font-semibold text-slate-600">
-                Showing results for <span class="text-op-blue">"{{ query }}"</span>
-              </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" aria-live="polite">
               <article
@@ -190,44 +183,6 @@
             </div>
           </div>
           <aside class="w-full lg:w-[340px] space-y-8">
-            <div class="op-card rounded-xl p-8">
-              <h4 class="font-extrabold text-lg mb-6 flex items-center gap-2 text-slate-900">
-                <span class="material-symbols-outlined text-op-blue">tune</span>
-                Fine-tune results
-              </h4>
-              <div class="space-y-6">
-                <div>
-                  <p class="text-[11px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Project Vibes</p>
-                  <div class="flex flex-wrap gap-2">
-                    <button class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700" type="button">
-                      Modern
-                    </button>
-                    <button class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700" type="button">
-                      Playful
-                    </button>
-                    <button class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700" type="button">
-                      Luxurious
-                    </button>
-                    <button class="px-3 py-1.5 rounded-md border border-slate-200 text-xs font-bold text-slate-700" type="button">
-                      Trustworthy
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-[11px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Modify Prompt</p>
-                  <ul class="space-y-3">
-                    <li class="flex items-center justify-between text-sm font-semibold text-slate-600">
-                      <span>Add "Health" keyword</span>
-                      <span class="material-symbols-outlined text-sm">add_circle</span>
-                    </li>
-                    <li class="flex items-center justify-between text-sm font-semibold text-slate-600">
-                      <span>Focus on mobile app</span>
-                      <span class="material-symbols-outlined text-sm">add_circle</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
             <div class="rounded-xl overflow-hidden relative group cursor-pointer shadow-lg border border-op-blue/10">
               <div class="absolute inset-0 bg-op-blue"></div>
               <div
@@ -238,9 +193,9 @@
                 <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-6 backdrop-blur-md">
                   <span class="material-symbols-outlined text-white text-3xl">dns</span>
                 </div>
-                <h5 class="text-xl font-extrabold mb-3 leading-tight">Bundle with Managed Hosting</h5>
+                <h5 class="text-xl font-extrabold mb-3 leading-tight">Bundle with Email Hosting</h5>
                 <p class="text-sm text-white/90 mb-8 font-medium">Claim your domain for free when you sign up for an annual hosting plan today.</p>
-                <button class="w-full py-3.5 bg-white text-op-blue font-extrabold rounded-lg text-sm" type="button">Explore Plans</button>
+                <a class="w-full py-3.5 bg-white text-op-blue font-extrabold rounded-lg text-sm btn px-2" type="button" href="https://openprovider.com" target="_blank">Explore Plans</a>
               </div>
             </div>
             <div class="p-8 bg-white border border-slate-200 rounded-xl">
@@ -270,6 +225,8 @@ const suggestions = ref([]);
 const statusMessage = ref('');
 const statusVariant = ref('info');
 const isStreaming = ref(false);
+const selectedTlds = ref([]);
+const tldOptions = ['.ai', '.app', '.com', '.dev', '.io', '.co'];
 let activeAbortController = null;
 
 let cardSequence = 0;
@@ -306,6 +263,12 @@ const statusClass = computed(() => {
 });
 
 const hasResults = computed(() => suggestions.value.length > 0);
+const preferredTldMessage = computed(() => {
+  if (!selectedTlds.value.length) {
+    return 'Leave unselected to let the AI explore any TLD.';
+  }
+  return `AI will prefer: ${selectedTlds.value.join(', ')}`;
+});
 
 const setStatus = (message, variant = 'info') => {
   statusMessage.value = message ?? '';
@@ -320,6 +283,25 @@ const cancelActiveStream = () => {
 };
 
 onBeforeUnmount(cancelActiveStream);
+
+const isTldSelected = (tld) => selectedTlds.value.includes(tld);
+
+const toggleTld = (tld) => {
+  if (!tld) {
+    return;
+  }
+  if (isTldSelected(tld)) {
+    selectedTlds.value = selectedTlds.value.filter((value) => value !== tld);
+  } else {
+    selectedTlds.value = [...selectedTlds.value, tld];
+  }
+};
+
+const clearSelectedTlds = () => {
+  if (selectedTlds.value.length) {
+    selectedTlds.value = [];
+  }
+};
 
 const handleSubmit = async () => {
   const keyword = query.value.trim();
@@ -339,6 +321,17 @@ const handleSubmit = async () => {
     product: 'domain',
     query: keyword,
   };
+
+  const preferredTlds = selectedTlds.value
+    .map((tld) => tld.replace(/^\./, '').trim())
+    .filter(Boolean);
+  if (preferredTlds.length) {
+    payload.filter = {
+      domain: {
+        includedTldNames: preferredTlds.join(','),
+      },
+    };
+  }
 
   try {
     let count = 0;
@@ -390,7 +383,7 @@ const mapResponseToCard = (response) => {
     availability: Boolean(price.availability),
     amount: formatPriceAmount(cost, price.currency),
     showRenewal: Number.isFinite(renewalCost) && Number.isFinite(cost) && renewalCost > cost,
-    renewalAmount: formatPriceAmount(renewalCost, price.currency),
+    renewalAmount: formatPriceAmount(renewalCost, ""),
     extras,
     scorePercent: scoreToPercent(price.similarityScore),
   };
