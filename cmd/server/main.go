@@ -19,10 +19,12 @@ import (
 	domainsearch "github.com/olaysco/domain-search-llm/internal/domainsearch"
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
 	"github.com/olaysco/domain-search-llm/internal/llm"
+	"github.com/olaysco/domain-search-llm/internal/logger"
 	"github.com/olaysco/domain-search-llm/internal/provider"
 	pricepb "github.com/openprovider/contracts/v2/product/price"
+	"github.com/openprovider/grpc/client"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -34,9 +36,11 @@ func main() {
 		priceAddr = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", ""), "address for the upstream price gRPC service")
 	)
 	flag.Parse()
+	log := logger.New()
+	defer log.Sync()
 
 	if err := ensureDir(*staticDir); err != nil {
-		log.Fatalf("static directory: %v", err)
+		log.Fatal("static directory ", zap.Error(err))
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -44,12 +48,26 @@ func main() {
 	if *priceAddr == "" {
 		log.Fatal("price service address is not configured (set --price-addr or PRICE_SERVICE_ADDR)")
 	}
-	priceConn, err := grpc.NewClient(*priceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("connect to price service: %v", err)
+
+	cfg := &client.Config{
+		Scheme:     "checker",
+		Host:       "grpc.openprovider.com",
+		Sockets:    []string{"grpc.openprovider.com:443", "grpc.openprovider.com:443"},
+		Balancer:   "round_robin",
+		Insecure:   false,
+		EnvoyProxy: false,
 	}
-	defer priceConn.Close()
-	priceSvc := provider.NewPriceService(pricepb.NewPriceServiceClient(priceConn))
+	priceConn, err := client.New(cfg, log)
+	if err != nil {
+		log.Fatal("unable to connect to price nameserver ", zap.Error(err))
+	}
+
+	// priceConn, err := grpc.NewClient(*priceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// if err != nil {
+	// 	log.Fatalf("connect to price service: %v", err)
+	// }
+	defer priceConn.Connection().Close()
+	priceSvc := provider.NewPriceService(pricepb.NewPriceServiceClient(priceConn.Connection()))
 
 	grpcServer := grpc.NewServer()
 	llmConfig := &llm.Config{
@@ -62,12 +80,12 @@ func main() {
 
 	grpcLis, err := net.Listen("tcp", *grpcAddr)
 	if err != nil {
-		log.Fatalf("listen gRPC: %v", err)
+		log.Fatal("listen gRP ", zap.Error(err))
 	}
 	go func() {
-		log.Printf("gRPC server listening on %s", *grpcAddr)
+		log.Info("gRPC server listening on ", zap.String("gRPC Address", *grpcAddr))
 		if err := grpcServer.Serve(grpcLis); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
-			log.Fatalf("gRPC server: %v", err)
+			log.Fatal("gRPC server", zap.Error(err))
 		}
 	}()
 
@@ -102,14 +120,14 @@ func main() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
-			log.Printf("http shutdown: %v", err)
+			log.Info("http shutdown", zap.Error(err))
 		}
 		grpcServer.GracefulStop()
 	}()
 
-	log.Printf("UI available at http://localhost%s", *httpAddr)
+	log.Info("UI available at http://localhost", zap.String("UI Address", *httpAddr))
 	if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("http server: %v", err)
+		log.Fatal("http server", zap.Error(err))
 	}
 }
 
