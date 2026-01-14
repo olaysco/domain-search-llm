@@ -30,10 +30,11 @@ import (
 func main() {
 	_ = godotenv.Load()
 	var (
-		grpcAddr  = flag.String("grpc-addr", ":9090", "address for the gRPC server")
-		httpAddr  = flag.String("http-addr", ":8010", "address for the HTTP server that hosts the UI and gRPC-Web")
-		staticDir = flag.String("static-dir", "web/dist", "directory that holds the built static web assets")
-		priceAddr = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", ""), "address for the upstream price gRPC service")
+		grpcAddr     = flag.String("grpc-addr", ":9090", "address for the gRPC server")
+		httpAddr     = flag.String("http-addr", ":8010", "address for the HTTP server that hosts the UI and gRPC-Web")
+		staticDir    = flag.String("static-dir", "web/dist", "directory that holds the built static web assets")
+		priceAddr    = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", ""), "address for the upstream price gRPC service")
+		priceAddrTls = flag.Bool("price-addr-tls", envOrDefault("PRICE_SERVICE_ADDR_TLS", "true") == "true", "address for the price service supports tls")
 	)
 	flag.Parse()
 	log := logger.New()
@@ -48,13 +49,19 @@ func main() {
 	if *priceAddr == "" {
 		log.Fatal("price service address is not configured (set --price-addr or PRICE_SERVICE_ADDR)")
 	}
+	socketAddrPrefix := ""
+	if *priceAddrTls {
+		socketAddrPrefix = ":443"
+	}
+	socketAddr := fmt.Sprintf("%s%s", *priceAddr, socketAddrPrefix)
+	log.Info(socketAddr)
 
 	cfg := &client.Config{
 		Scheme:     "checker",
-		Host:       "grpc.openprovider.com",
-		Sockets:    []string{"grpc.openprovider.com:443", "grpc.openprovider.com:443"},
+		Host:       *priceAddr,
+		Sockets:    []string{socketAddr, socketAddr},
 		Balancer:   "round_robin",
-		Insecure:   false,
+		Insecure:   !*priceAddrTls,
 		EnvoyProxy: false,
 	}
 	priceConn, err := client.New(cfg, log)
@@ -62,10 +69,6 @@ func main() {
 		log.Fatal("unable to connect to price nameserver ", zap.Error(err))
 	}
 
-	// priceConn, err := grpc.NewClient(*priceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	// if err != nil {
-	// 	log.Fatalf("connect to price service: %v", err)
-	// }
 	defer priceConn.Connection().Close()
 	priceSvc := provider.NewPriceService(pricepb.NewPriceServiceClient(priceConn.Connection()))
 
