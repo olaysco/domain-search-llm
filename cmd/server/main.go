@@ -111,8 +111,8 @@ func main() {
 	httpServer := &http.Server{
 		Addr:         *httpAddr,
 		Handler:      loggingMiddleware(rootHandler),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
