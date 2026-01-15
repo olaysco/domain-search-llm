@@ -47,3 +47,23 @@ Example:
 ```bash
 go run ./cmd/server --grpc-addr=:50051 --http-addr=:3000 --static-dir=web/dist
 ```
+
+## Docker image
+
+A multi-stage Docker build is included so you can ship a single container that bundles the Vue assets and Go server:
+
+```bash
+DOCKER_BUILDKIT=1 docker build --ssh default -t domain-search-llm .
+```
+
+At runtime pass the required environment variables (AI + price service settings) and publish the HTTP/gRPC ports you need, e.g.:
+
+```bash
+docker run --rm -p 8050:8080 -p 9090:9090 \
+  -e AI_API_KEY=key \
+  -e AI_MODEL=model\
+  -e AI_ENDPOINT=url \
+  -e PRICE_SERVICE_ADDR=provider \
+  -e PRICE_SERVICE_ADDR_TLS=true \
+  ghcr.io/olaysco/domain-search-llm:v0.1.0
+```
