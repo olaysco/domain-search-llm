@@ -31,7 +31,7 @@ func main() {
 	_ = godotenv.Load()
 	var (
 		grpcAddr     = flag.String("grpc-addr", ":9090", "address for the gRPC server")
-		httpAddr     = flag.String("http-addr", ":8010", "address for the HTTP server that hosts the UI and gRPC-Web")
+		httpAddr     = flag.String("http-addr", envOrDefault("HTTP_ADDR", ":8010"), "address for the HTTP server that hosts the UI and gRPC-Web")
 		staticDir    = flag.String("static-dir", "web/dist", "directory that holds the built static web assets")
 		priceAddr    = flag.String("price-addr", envOrDefault("PRICE_SERVICE_ADDR", ""), "address for the upstream price gRPC service")
 		priceAddrTls = flag.Bool("price-addr-tls", envOrDefault("PRICE_SERVICE_ADDR_TLS", "true") == "true", "address for the price service supports tls")
