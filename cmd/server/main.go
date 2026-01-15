@@ -18,11 +18,11 @@ import (
 	"github.com/joho/godotenv"
 	domainsearch "github.com/olaysco/domain-search-llm/internal/domainsearch"
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
+	client "github.com/olaysco/domain-search-llm/internal/grpc"
 	"github.com/olaysco/domain-search-llm/internal/llm"
 	"github.com/olaysco/domain-search-llm/internal/logger"
 	"github.com/olaysco/domain-search-llm/internal/provider"
 	pricepb "github.com/openprovider/contracts/v2/product/price"
-	"github.com/openprovider/grpc/client"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -57,20 +57,18 @@ func main() {
 	log.Info(socketAddr)
 
 	cfg := &client.Config{
-		Scheme:     "checker",
-		Host:       *priceAddr,
-		Sockets:    []string{socketAddr, socketAddr},
-		Balancer:   "round_robin",
+		Target:     socketAddr,
+		ServerName: *priceAddr,
 		Insecure:   !*priceAddrTls,
-		EnvoyProxy: false,
 	}
-	priceConn, err := client.New(cfg, log)
+
+	priceConn, err := client.New(cfg)
 	if err != nil {
 		log.Fatal("unable to connect to price nameserver ", zap.Error(err))
 	}
 
-	defer priceConn.Connection().Close()
-	priceSvc := provider.NewPriceService(pricepb.NewPriceServiceClient(priceConn.Connection()))
+	defer priceConn.Close()
+	priceSvc := provider.NewPriceService(pricepb.NewPriceServiceClient(priceConn))
 
 	grpcServer := grpc.NewServer()
 	llmConfig := &llm.Config{

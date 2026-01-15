@@ -84,6 +84,7 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 	wg.Wait()
 	select {
 	case err := <-errCh:
+		fmt.Println(err)
 		return err
 	default:
 		return nil
