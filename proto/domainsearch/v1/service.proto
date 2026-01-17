@@ -94,4 +94,5 @@ message DomainSuggestion {
 
 service DomainSearchService {
   rpc CheckPrice (SearchPricesRequest) returns (stream SearchPricesResponse);
+  rpc CheckPriceAgent (SearchPricesRequest) returns (stream SearchPricesResponse);
 }

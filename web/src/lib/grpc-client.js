@@ -1,4 +1,4 @@
-const DEFAULT_GRPC_ENDPOINT = '/domainsearch.v1.DomainSearchService/CheckPrice';
+const DEFAULT_GRPC_ENDPOINT = '/domainsearch.v1.DomainSearchService/CheckPriceAgent';
 
 const utf8Encoder = new TextEncoder();
 const utf8Decoder = new TextDecoder();
