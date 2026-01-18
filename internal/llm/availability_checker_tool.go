@@ -18,7 +18,7 @@ func NewAvailabilityCheckerTool() *AvailablityCheckerTool {
 	}
 }
 
-func (pct *AvailablityCheckerTool) Call(ctx context.Context, domain string) bool {
+func (pct *AvailablityCheckerTool) Call(ctx context.Context, domain string) (string, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -26,14 +26,14 @@ func (pct *AvailablityCheckerTool) Call(ctx context.Context, domain string) bool
 	resp, err := pct.client.Get(url)
 
 	if err != nil {
-		return true
+		return "true", nil
 	}
 
 	if resp.StatusCode == 200 {
-		return false
+		return "false", nil
 	}
 
-	return true
+	return "true", nil
 }
 
 func (pct *AvailablityCheckerTool) Name() string {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
@@ -21,7 +22,7 @@ func NewPriceCheckerTool(provider provider.PriceProvider) *PriceCheckerTool {
 	}
 }
 
-func (pct *PriceCheckerTool) Call(ctx context.Context, domain string) (float32, error) {
+func (pct *PriceCheckerTool) Call(ctx context.Context, domain string) (string, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -55,12 +56,12 @@ func (pct *PriceCheckerTool) Call(ctx context.Context, domain string) (float32, 
 	wg.Wait()
 	select {
 	case respn := <-respCh:
-		return respn.Cost, nil
+		return strconv.FormatFloat(float64(respn.Cost), 'f', 2, 32), nil
 	case err := <-errCh:
 		fmt.Println(err)
-		return 0, err
+		return "0", err
 	default:
-		return 0, fmt.Errorf("unable to fetch price for %s", domain)
+		return "0", fmt.Errorf("unable to fetch price for %s", domain)
 	}
 }
 
