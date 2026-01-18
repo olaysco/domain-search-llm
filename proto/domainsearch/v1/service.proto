@@ -85,6 +85,9 @@ message Price {
 
   // Renewal cost is approximate renewal price for the domain.
   float renewal_cost = 8;
+
+  // AI reasoning explaining why this domain was suggested.
+  string reasoning = 9;
 }
 
 message DomainSuggestion {

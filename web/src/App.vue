@@ -106,12 +106,12 @@
           </div>
         </section>
 
-        <section v-if="hasResults" class="flex flex-col lg:flex-row gap-10">
+        <section v-if="hasResults || isStreaming" class="flex flex-col lg:flex-row gap-10">
           <div class="flex-1 space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h3 class="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
                 Recommended for you
-                <span class="text-xs font-bold text-slate-500 bg-slate-200/50 px-3 py-1 rounded-full uppercase tracking-tighter">
+                <span v-if="suggestions.length > 0" class="text-xs font-bold text-slate-500 bg-slate-200/50 px-3 py-1 rounded-full uppercase tracking-tighter">
                   {{ suggestions.length }} Domains
                 </span>
               </h3>
@@ -156,11 +156,15 @@
                 :class="card.cardClass"
               >
                 <div class="flex justify-between items-start gap-4">
-                  <div>
+                  <div class="flex-1">
                     <h3 class="text-xl font-extrabold mb-1 text-slate-900">{{ card.domain }}</h3>
                     <span :class="card.badgeClass">{{ card.badgeTitle }}</span>
+                    <p v-if="card.reasoning" class="mt-2 text-xs text-slate-600 leading-relaxed flex items-start gap-1.5">
+                      <span class="material-symbols-outlined text-op-blue text-sm mt-0.5 flex-shrink-0">lightbulb</span>
+                      <span>{{ card.reasoning }}</span>
+                    </p>
                   </div>
-                  <div class="text-right">
+                  <div class="text-right flex-shrink-0">
                     <div
                       class="flex items-center gap-1 text-[11px] font-bold uppercase"
                       :class="card.availability ? 'text-green-600' : 'text-slate-500'"
@@ -418,6 +422,7 @@ const mapResponseToCard = (response) => {
     renewalAmount: formatPriceAmount(renewalCost, ""),
     extras,
     scorePercent: scoreToPercent(price.similarityScore),
+    reasoning: price.reasoning || '',
   };
 };
 

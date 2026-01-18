@@ -127,7 +127,7 @@ func (s *SearchService) CheckPriceAgent(req *domainsearchv1.SearchPricesRequest,
 				}
 				if price := resp.GetPrice(); price != nil {
 					price.SimilarityScore = domain.Score
-					fmt.Println(price)
+					price.Reasoning = domain.Reasoning
 				}
 				return stream.Send(resp)
 			}); err != nil && !errors.Is(err, context.Canceled) {
@@ -148,21 +148,6 @@ func (s *SearchService) CheckPriceAgent(req *domainsearchv1.SearchPricesRequest,
 	default:
 		return nil
 	}
-}
-
-// Helper functions for safe pointer dereferencing
-func getFloat32Value(ptr *float32) float32 {
-	if ptr == nil {
-		return 0
-	}
-	return *ptr
-}
-
-func getBoolValue(ptr *bool, defaultVal bool) bool {
-	if ptr == nil {
-		return defaultVal
-	}
-	return *ptr
 }
 
 func buildLLMContext(req *domainsearchv1.SearchPricesRequest) map[string]interface{} {

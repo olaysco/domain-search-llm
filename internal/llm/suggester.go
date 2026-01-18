@@ -32,6 +32,7 @@ type DomainSuggestion struct {
 	Currency     string   `json:"currency,omitempty"`
 	RenewalPrice *float32 `json:"renewal_price,omitempty"`
 	Promotion    *bool    `json:"promotion,omitempty"`
+	Reasoning    string   `json:"reasoning,omitempty"`
 }
 
 type LLMSuggester struct {
