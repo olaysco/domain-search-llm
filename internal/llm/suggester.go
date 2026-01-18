@@ -25,8 +25,13 @@ type AISuggestionRequest struct {
 }
 
 type DomainSuggestion struct {
-	Domain string  `json:"domain"`
-	Score  float64 `json:"relevance_score,omitempty"`
+	Domain       string   `json:"domain"`
+	Score        float64  `json:"relevance_score,omitempty"`
+	Available    *bool    `json:"available,omitempty"`
+	Price        *float32 `json:"price,omitempty"`
+	Currency     string   `json:"currency,omitempty"`
+	RenewalPrice *float32 `json:"renewal_price,omitempty"`
+	Promotion    *bool    `json:"promotion,omitempty"`
 }
 
 type LLMSuggester struct {
