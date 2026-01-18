@@ -54,3 +54,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )
+
+replace (
+	github.com/gage-technologies/mistral-go => github.com/olaysco/mistral-go v0.0.0-20260118162831-2ba3bae9d588
+	github.com/tmc/langchaingo => github.com/olaysco/langchaingo v0.0.0-20260118162840-9bf67b294671
+)
