@@ -6,6 +6,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"sync"
 
 	domainsearchv1 "github.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1"
 	pricepb "github.com/openprovider/contracts/v2/product/price"
@@ -23,19 +24,36 @@ type PriceProvider interface {
 // PriceService implements PriceProvider on top of the Openprovider PriceService gRPC API.
 type PriceService struct {
 	client pricepb.PriceServiceClient
+	cache  map[string]*domainsearchv1.Price
+	mu     sync.RWMutex
 }
 
 // NewPriceService wires the external PriceService client into our provider abstraction.
 func NewPriceService(client pricepb.PriceServiceClient) *PriceService {
-	return &PriceService{client: client}
+	return &PriceService{
+		client: client,
+		cache:  make(map[string]*domainsearchv1.Price),
+	}
 }
 
 // StreamPrices forwards the request to the upstream gRPC service and relays every streamed response
 // to the provided handler. The handler is invoked synchronously for each incoming message.
+// Results are cached for subsequent calls with the same domain.
 func (p *PriceService) StreamPrices(ctx context.Context, req string, handler PriceStreamHandler) error {
 	if handler == nil {
 		return fmt.Errorf("price stream handler cannot be nil")
 	}
+
+	cacheKey := strings.ToLower(strings.TrimSpace(req))
+
+	p.mu.RLock()
+	if cachedPrice, ok := p.cache[cacheKey]; ok {
+		p.mu.RUnlock()
+		return handler(&domainsearchv1.SearchPricesResponse{
+			Response: &domainsearchv1.SearchPricesResponse_Price{Price: cachedPrice},
+		})
+	}
+	p.mu.RUnlock()
 
 	stream, err := p.client.SearchPriceFastCheckout(ctx, toPriceSearchRequest(req))
 	if err != nil {
@@ -52,11 +70,24 @@ func (p *PriceService) StreamPrices(ctx context.Context, req string, handler Pri
 		}
 
 		if resp := fromPriceSearchResponse(req, msg); resp != nil {
+			if price := resp.GetPrice(); price != nil {
+				p.mu.Lock()
+				p.cache[cacheKey] = price
+				p.mu.Unlock()
+			}
+
 			if err := handler(resp); err != nil {
 				return err
 			}
 		}
 	}
+}
+
+// ClearCache clears all cached price results
+func (p *PriceService) ClearCache() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.cache = make(map[string]*domainsearchv1.Price)
 }
 
 func toPriceSearchRequest(req string) *pricepb.SearchPricesRequest {
