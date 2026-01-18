@@ -9,7 +9,7 @@ COPY web/ ./
 RUN npm run build
 
 # Stage 2: Build the Go server (with pre-built web assets)
-FROM golang:1.23-bullseye AS go-builder
+FROM golang:1.24-bullseye AS go-builder
 ENV GOPRIVATE=github.com/openprovider,openprovider.services,contracts.name,domingo.services
 # Add github.com to known hosts for SSH
 RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
