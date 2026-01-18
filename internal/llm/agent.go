@@ -28,7 +28,7 @@ type AgentResponse struct {
 }
 
 func NewLLMAgent(llm llms.Model, tools map[string]LLMTools) *LLMAgent {
-	llmTools := make([]llms.Tool, len(tools))
+	llmTools := make([]llms.Tool, 0, len(tools))
 	for _, tool := range tools {
 		llmTools = append(llmTools, tool.Definition())
 	}
