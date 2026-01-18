@@ -52,10 +52,10 @@
               />
               <button
                 type="submit"
-                class="bg-op-blue hover:bg-blue-700 text-white font-bold px-10 py-4 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-60"
+                class="bg-op-blue hover:bg-blue-700 text-white font-bold px-4 py-4 md:px-10 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-60"
                 :disabled="isStreaming"
               >
-                <span>{{ isStreaming ? 'Searching…' : 'Search' }}</span>
+                <span class="hidden md:inline">{{ isStreaming ? 'Searching…' : 'Search' }}</span>
                 <span class="material-symbols-outlined text-sm">search</span>
               </button>
             </div>
