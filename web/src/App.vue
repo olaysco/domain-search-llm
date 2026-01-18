@@ -117,6 +117,38 @@
               </h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" aria-live="polite">
+              <!-- Skeleton Loaders -->
+              <article
+                v-if="isStreaming && suggestions.length < 4"
+                v-for="n in (4 - suggestions.length)"
+                :key="`skeleton-${n}`"
+                class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-4 animate-pulse"
+              >
+                <div class="flex justify-between items-start gap-4">
+                  <div class="flex-1">
+                    <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-slate-100 rounded w-20"></div>
+                  </div>
+                  <div class="text-right">
+                    <div class="h-3 bg-slate-100 rounded w-16 mb-2"></div>
+                    <div class="h-7 bg-slate-200 rounded w-20"></div>
+                  </div>
+                </div>
+                <div class="flex gap-2 border-t border-slate-100 pt-3">
+                  <div class="h-5 bg-slate-100 rounded-full w-16"></div>
+                  <div class="h-5 bg-slate-100 rounded-full w-20"></div>
+                </div>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="h-3 bg-slate-100 rounded w-24"></div>
+                    <div class="h-3 bg-slate-200 rounded w-10"></div>
+                  </div>
+                  <div class="h-2 w-full bg-slate-100 rounded-full"></div>
+                  <div class="h-12 bg-slate-200 rounded-lg w-full mt-2"></div>
+                </div>
+              </article>
+
+              <!-- Actual Results -->
               <article
                 v-for="card in suggestions"
                 :key="card.key"
