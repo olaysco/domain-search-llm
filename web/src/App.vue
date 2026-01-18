@@ -20,7 +20,7 @@
           </button>
         </div>
       </header>
-      <main class="flex-1 max-w-[1400px] mx-auto w-full px-6 lg:px-20 py-12">
+      <main class="flex-1 max-w-[1400px] mx-auto w-full px-6 lg:px-6 py-12">
         <section class="flex flex-col items-center text-center mb-16">
           <div
             class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-op-blue text-[11px] font-bold uppercase tracking-wider">
