@@ -58,9 +58,10 @@ func main() {
 	log.Info(socketAddr)
 
 	cfg := &client.Config{
-		Target:     socketAddr,
-		ServerName: *priceAddr,
-		Insecure:   !*priceAddrTls,
+		Target:       socketAddr,
+		ServerName:   *priceAddr,
+		Insecure:     !*priceAddrTls,
+		WaitForReady: true,
 	}
 
 	priceConn, err := client.New(cfg)
