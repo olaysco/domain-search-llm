@@ -23,6 +23,7 @@ import (
 	"github.com/olaysco/domain-search-llm/internal/logger"
 	"github.com/olaysco/domain-search-llm/internal/provider"
 	pricepb "github.com/openprovider/contracts/v2/product/price"
+	"github.com/tmc/langchaingo/llms/mistral"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -77,7 +78,20 @@ func main() {
 		AIModel:    os.Getenv("AI_MODEL"),
 	}
 	suggesterService := llm.NewLLMSuggester(*llmConfig)
-	domainsearchv1.RegisterDomainSearchServiceServer(grpcServer, domainsearch.NewSearchService(suggesterService, priceSvc))
+
+	llmModel, err := mistral.New(mistral.WithModel(llmConfig.AIModel), mistral.WithAPIKey(llmConfig.AIAPIKey))
+	if err != nil {
+		log.Fatal("unable to create LLM model ", zap.Error(err))
+	}
+
+	priceCheckerTool := llm.NewPriceCheckerTool(priceSvc)
+	avaialbilityTool := llm.NewAvailabilityCheckerTool()
+	llmTools := map[string]llm.LLMTools{
+		priceCheckerTool.Name(): priceCheckerTool,
+		avaialbilityTool.Name(): avaialbilityTool,
+	}
+	agentService := llm.NewLLMAgent(llmModel, llmTools)
+	domainsearchv1.RegisterDomainSearchServiceServer(grpcServer, domainsearch.NewSearchService(suggesterService, agentService, priceSvc))
 
 	grpcLis, err := net.Listen("tcp", *grpcAddr)
 	if err != nil {
