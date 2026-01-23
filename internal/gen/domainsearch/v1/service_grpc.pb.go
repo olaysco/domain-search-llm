@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DomainSearchService_CheckPrice_FullMethodName = "/domainsearch.v1.DomainSearchService/CheckPrice"
+	DomainSearchService_CheckPrice_FullMethodName      = "/domainsearch.v1.DomainSearchService/CheckPrice"
+	DomainSearchService_CheckPriceAgent_FullMethodName = "/domainsearch.v1.DomainSearchService/CheckPriceAgent"
 )
 
 // DomainSearchServiceClient is the client API for DomainSearchService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DomainSearchServiceClient interface {
 	CheckPrice(ctx context.Context, in *SearchPricesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchPricesResponse], error)
+	CheckPriceAgent(ctx context.Context, in *SearchPricesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchPricesResponse], error)
 }
 
 type domainSearchServiceClient struct {
@@ -56,11 +58,31 @@ func (c *domainSearchServiceClient) CheckPrice(ctx context.Context, in *SearchPr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type DomainSearchService_CheckPriceClient = grpc.ServerStreamingClient[SearchPricesResponse]
 
+func (c *domainSearchServiceClient) CheckPriceAgent(ctx context.Context, in *SearchPricesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SearchPricesResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &DomainSearchService_ServiceDesc.Streams[1], DomainSearchService_CheckPriceAgent_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[SearchPricesRequest, SearchPricesResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type DomainSearchService_CheckPriceAgentClient = grpc.ServerStreamingClient[SearchPricesResponse]
+
 // DomainSearchServiceServer is the server API for DomainSearchService service.
 // All implementations must embed UnimplementedDomainSearchServiceServer
 // for forward compatibility.
 type DomainSearchServiceServer interface {
 	CheckPrice(*SearchPricesRequest, grpc.ServerStreamingServer[SearchPricesResponse]) error
+	CheckPriceAgent(*SearchPricesRequest, grpc.ServerStreamingServer[SearchPricesResponse]) error
 	mustEmbedUnimplementedDomainSearchServiceServer()
 }
 
@@ -73,6 +95,9 @@ type UnimplementedDomainSearchServiceServer struct{}
 
 func (UnimplementedDomainSearchServiceServer) CheckPrice(*SearchPricesRequest, grpc.ServerStreamingServer[SearchPricesResponse]) error {
 	return status.Error(codes.Unimplemented, "method CheckPrice not implemented")
+}
+func (UnimplementedDomainSearchServiceServer) CheckPriceAgent(*SearchPricesRequest, grpc.ServerStreamingServer[SearchPricesResponse]) error {
+	return status.Error(codes.Unimplemented, "method CheckPriceAgent not implemented")
 }
 func (UnimplementedDomainSearchServiceServer) mustEmbedUnimplementedDomainSearchServiceServer() {}
 func (UnimplementedDomainSearchServiceServer) testEmbeddedByValue()                             {}
@@ -106,6 +131,17 @@ func _DomainSearchService_CheckPrice_Handler(srv interface{}, stream grpc.Server
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type DomainSearchService_CheckPriceServer = grpc.ServerStreamingServer[SearchPricesResponse]
 
+func _DomainSearchService_CheckPriceAgent_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchPricesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(DomainSearchServiceServer).CheckPriceAgent(m, &grpc.GenericServerStream[SearchPricesRequest, SearchPricesResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type DomainSearchService_CheckPriceAgentServer = grpc.ServerStreamingServer[SearchPricesResponse]
+
 // DomainSearchService_ServiceDesc is the grpc.ServiceDesc for DomainSearchService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -117,6 +153,11 @@ var DomainSearchService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "CheckPrice",
 			Handler:       _DomainSearchService_CheckPrice_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "CheckPriceAgent",
+			Handler:       _DomainSearchService_CheckPriceAgent_Handler,
 			ServerStreams: true,
 		},
 	},

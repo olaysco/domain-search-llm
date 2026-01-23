@@ -18,6 +18,7 @@ import (
 type SearchService struct {
 	domainsearchv1.UnimplementedDomainSearchServiceServer
 	llmSuggester  *llm.LLMSuggester
+	llmAgent      *llm.LLMAgent
 	priceProvider provider.PriceProvider
 
 	rnd  *rand.Rand
@@ -25,10 +26,11 @@ type SearchService struct {
 }
 
 // NewService constructs a Service with a time-based random seed.
-func NewSearchService(llmSusggester *llm.LLMSuggester, priceProvider provider.PriceProvider) *SearchService {
+func NewSearchService(llmSusggester *llm.LLMSuggester, llmAgent *llm.LLMAgent, priceProvider provider.PriceProvider) *SearchService {
 	return &SearchService{
 		rnd:           rand.New(rand.NewSource(time.Now().UnixNano())),
 		llmSuggester:  llmSusggester,
+		llmAgent:      llmAgent,
 		priceProvider: priceProvider,
 	}
 }
@@ -52,13 +54,11 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 		fmt.Println(err)
 		return err
 	}
-	fmt.Println(llmResponse)
 
 	var wg sync.WaitGroup
 	errCh := make(chan error, 1)
 
 	for _, suggestion := range llmResponse {
-		suggestion := suggestion
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -79,6 +79,65 @@ func (s *SearchService) CheckPrice(req *domainsearchv1.SearchPricesRequest, stre
 				cancel()
 			}
 		}()
+	}
+
+	wg.Wait()
+	select {
+	case err := <-errCh:
+		fmt.Println(err)
+		return err
+	default:
+		return nil
+	}
+}
+
+func (s *SearchService) CheckPriceAgent(req *domainsearchv1.SearchPricesRequest, stream domainsearchv1.DomainSearchService_CheckPriceAgentServer) error {
+	ctx, cancel := context.WithCancel(stream.Context())
+	defer cancel()
+
+	if req == nil {
+		return nil
+	}
+
+	llmQuery := llm.AISuggestionRequest{
+		Query:      req.Query,
+		MaxResults: 10,
+		Context:    buildLLMContext(req),
+	}
+
+	// Execute agent to get domain suggestions
+	agentResp, err := s.llmAgent.ExecuteWithTools(ctx, llmQuery)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// Stream prices for each domain suggestion
+	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+
+	for _, suggestion := range agentResp.Domains {
+		wg.Add(1)
+		go func(domain llm.DomainSuggestion) {
+			defer wg.Done()
+			// Fetch prices from provider (cache is handled internally)
+			if err := s.priceProvider.StreamPrices(ctx, domain.Domain, func(resp *domainsearchv1.SearchPricesResponse) error {
+				if resp == nil {
+					return nil
+				}
+				if price := resp.GetPrice(); price != nil {
+					price.SimilarityScore = domain.Score
+					price.Reasoning = domain.Reasoning
+				}
+				return stream.Send(resp)
+			}); err != nil && !errors.Is(err, context.Canceled) {
+				select {
+				case errCh <- err:
+				default:
+				}
+				cancel()
+			}
+		}(suggestion)
 	}
 
 	wg.Wait()

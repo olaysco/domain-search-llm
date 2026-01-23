@@ -20,7 +20,7 @@
           </button>
         </div>
       </header>
-      <main class="flex-1 max-w-[1400px] mx-auto w-full px-6 lg:px-20 py-12">
+      <main class="flex-1 max-w-[1400px] mx-auto w-full px-6 lg:px-6 py-12">
         <section class="flex flex-col items-center text-center mb-16">
           <div
             class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-op-blue text-[11px] font-bold uppercase tracking-wider">
@@ -52,10 +52,10 @@
               />
               <button
                 type="submit"
-                class="bg-op-blue hover:bg-blue-700 text-white font-bold px-10 py-4 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-60"
+                class="bg-op-blue hover:bg-blue-700 text-white font-bold px-4 py-4 md:px-10 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:opacity-60"
                 :disabled="isStreaming"
               >
-                <span>{{ isStreaming ? 'Searching…' : 'Search' }}</span>
+                <span class="hidden md:inline">{{ isStreaming ? 'Searching…' : 'Search' }}</span>
                 <span class="material-symbols-outlined text-sm">search</span>
               </button>
             </div>
@@ -106,17 +106,49 @@
           </div>
         </section>
 
-        <section v-if="hasResults" class="flex flex-col lg:flex-row gap-10">
+        <section v-if="hasResults || isStreaming" class="flex flex-col lg:flex-row gap-10">
           <div class="flex-1 space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h3 class="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
                 Recommended for you
-                <span class="text-xs font-bold text-slate-500 bg-slate-200/50 px-3 py-1 rounded-full uppercase tracking-tighter">
+                <span v-if="suggestions.length > 0" class="text-xs font-bold text-slate-500 bg-slate-200/50 px-3 py-1 rounded-full uppercase tracking-tighter">
                   {{ suggestions.length }} Domains
                 </span>
               </h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" aria-live="polite">
+              <!-- Skeleton Loaders -->
+              <article
+                v-if="isStreaming && suggestions.length < 4"
+                v-for="n in (4 - suggestions.length)"
+                :key="`skeleton-${n}`"
+                class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-4 animate-pulse"
+              >
+                <div class="flex justify-between items-start gap-4">
+                  <div class="flex-1">
+                    <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-slate-100 rounded w-20"></div>
+                  </div>
+                  <div class="text-right">
+                    <div class="h-3 bg-slate-100 rounded w-16 mb-2"></div>
+                    <div class="h-7 bg-slate-200 rounded w-20"></div>
+                  </div>
+                </div>
+                <div class="flex gap-2 border-t border-slate-100 pt-3">
+                  <div class="h-5 bg-slate-100 rounded-full w-16"></div>
+                  <div class="h-5 bg-slate-100 rounded-full w-20"></div>
+                </div>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="h-3 bg-slate-100 rounded w-24"></div>
+                    <div class="h-3 bg-slate-200 rounded w-10"></div>
+                  </div>
+                  <div class="h-2 w-full bg-slate-100 rounded-full"></div>
+                  <div class="h-12 bg-slate-200 rounded-lg w-full mt-2"></div>
+                </div>
+              </article>
+
+              <!-- Actual Results -->
               <article
                 v-for="card in suggestions"
                 :key="card.key"
@@ -124,11 +156,15 @@
                 :class="card.cardClass"
               >
                 <div class="flex justify-between items-start gap-4">
-                  <div>
+                  <div class="flex-1">
                     <h3 class="text-xl font-extrabold mb-1 text-slate-900">{{ card.domain }}</h3>
                     <span :class="card.badgeClass">{{ card.badgeTitle }}</span>
+                    <p v-if="card.reasoning" class="mt-2 text-xs text-slate-600 leading-relaxed flex items-start gap-1.5">
+                      <span class="material-symbols-outlined text-op-blue text-sm mt-0.5 flex-shrink-0">lightbulb</span>
+                      <span>{{ card.reasoning }}</span>
+                    </p>
                   </div>
-                  <div class="text-right">
+                  <div class="text-right flex-shrink-0">
                     <div
                       class="flex items-center gap-1 text-[11px] font-bold uppercase"
                       :class="card.availability ? 'text-green-600' : 'text-slate-500'"
@@ -386,6 +422,7 @@ const mapResponseToCard = (response) => {
     renewalAmount: formatPriceAmount(renewalCost, ""),
     extras,
     scorePercent: scoreToPercent(price.similarityScore),
+    reasoning: price.reasoning || '',
   };
 };
 

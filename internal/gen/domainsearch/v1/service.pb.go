@@ -365,7 +365,9 @@ type Price struct {
 	// Similarity score of the suggestion compared to the query.
 	SimilarityScore float64 `protobuf:"fixed64,7,opt,name=similarity_score,json=similarityScore,proto3" json:"similarity_score,omitempty"`
 	// Renewal cost is approximate renewal price for the domain.
-	RenewalCost   float32 `protobuf:"fixed32,8,opt,name=renewal_cost,json=renewalCost,proto3" json:"renewal_cost,omitempty"`
+	RenewalCost float32 `protobuf:"fixed32,8,opt,name=renewal_cost,json=renewalCost,proto3" json:"renewal_cost,omitempty"`
+	// AI reasoning explaining why this domain was suggested.
+	Reasoning     string `protobuf:"bytes,9,opt,name=reasoning,proto3" json:"reasoning,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -456,6 +458,13 @@ func (x *Price) GetRenewalCost() float32 {
 	return 0
 }
 
+func (x *Price) GetReasoning() string {
+	if x != nil {
+		return x.Reasoning
+	}
+	return ""
+}
+
 type DomainSuggestion struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Domain        string                 `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
@@ -530,7 +539,7 @@ const file_domainsearch_v1_service_proto_rawDesc = "" +
 	"\x05price\x18\x01 \x01(\v2\x16.domainsearch.v1.PriceH\x00R\x05price\x12*\n" +
 	"\x05error\x18\x02 \x01(\v2\x12.google.rpc.StatusH\x00R\x05errorB\n" +
 	"\n" +
-	"\bresponse\"\xf7\x01\n" +
+	"\bresponse\"\x95\x02\n" +
 	"\x05Price\x12\x1c\n" +
 	"\tpromotion\x18\x01 \x01(\bR\tpromotion\x12\x12\n" +
 	"\x04cost\x18\x02 \x01(\x02R\x04cost\x12\x1a\n" +
@@ -539,13 +548,15 @@ const file_domainsearch_v1_service_proto_rawDesc = "" +
 	"\x06labels\x18\x05 \x03(\tR\x06labels\x12\"\n" +
 	"\favailability\x18\x06 \x01(\bR\favailability\x12)\n" +
 	"\x10similarity_score\x18\a \x01(\x01R\x0fsimilarityScore\x12!\n" +
-	"\frenewal_cost\x18\b \x01(\x02R\vrenewalCost\"H\n" +
+	"\frenewal_cost\x18\b \x01(\x02R\vrenewalCost\x12\x1c\n" +
+	"\treasoning\x18\t \x01(\tR\treasoning\"H\n" +
 	"\x10DomainSuggestion\x12\x16\n" +
 	"\x06domain\x18\x01 \x01(\tR\x06domain\x12\x1c\n" +
-	"\tavailable\x18\x02 \x01(\bR\tavailable2r\n" +
+	"\tavailable\x18\x02 \x01(\bR\tavailable2\xd4\x01\n" +
 	"\x13DomainSearchService\x12[\n" +
 	"\n" +
-	"CheckPrice\x12$.domainsearch.v1.SearchPricesRequest\x1a%.domainsearch.v1.SearchPricesResponse0\x01BRZPgithub.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1;domainsearchv1b\x06proto3"
+	"CheckPrice\x12$.domainsearch.v1.SearchPricesRequest\x1a%.domainsearch.v1.SearchPricesResponse0\x01\x12`\n" +
+	"\x0fCheckPriceAgent\x12$.domainsearch.v1.SearchPricesRequest\x1a%.domainsearch.v1.SearchPricesResponse0\x01BRZPgithub.com/olaysco/domain-search-llm/internal/gen/domainsearch/v1;domainsearchv1b\x06proto3"
 
 var (
 	file_domainsearch_v1_service_proto_rawDescOnce sync.Once
@@ -577,9 +588,11 @@ var file_domainsearch_v1_service_proto_depIdxs = []int32{
 	4, // 3: domainsearch.v1.SearchPricesResponse.price:type_name -> domainsearch.v1.Price
 	7, // 4: domainsearch.v1.SearchPricesResponse.error:type_name -> google.rpc.Status
 	0, // 5: domainsearch.v1.DomainSearchService.CheckPrice:input_type -> domainsearch.v1.SearchPricesRequest
-	3, // 6: domainsearch.v1.DomainSearchService.CheckPrice:output_type -> domainsearch.v1.SearchPricesResponse
-	6, // [6:7] is the sub-list for method output_type
-	5, // [5:6] is the sub-list for method input_type
+	0, // 6: domainsearch.v1.DomainSearchService.CheckPriceAgent:input_type -> domainsearch.v1.SearchPricesRequest
+	3, // 7: domainsearch.v1.DomainSearchService.CheckPrice:output_type -> domainsearch.v1.SearchPricesResponse
+	3, // 8: domainsearch.v1.DomainSearchService.CheckPriceAgent:output_type -> domainsearch.v1.SearchPricesResponse
+	7, // [7:9] is the sub-list for method output_type
+	5, // [5:7] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
 	5, // [5:5] is the sub-list for extension extendee
 	0, // [0:5] is the sub-list for field type_name

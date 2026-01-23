@@ -1,4 +1,4 @@
-const DEFAULT_GRPC_ENDPOINT = '/domainsearch.v1.DomainSearchService/CheckPrice';
+const DEFAULT_GRPC_ENDPOINT = '/domainsearch.v1.DomainSearchService/CheckPriceAgent';
 
 const utf8Encoder = new TextEncoder();
 const utf8Decoder = new TextDecoder();
@@ -338,7 +338,8 @@ const decodePricePayload = (buffer) => {
     labels: [],
     availability: false,
     similarityScore: 0,
-    renewalCost: 0
+    renewalCost: 0,
+    reasoning: ''
   };
   while (offset < buffer.length) {
     const { value: tag, nextOffset } = decodeVarint(buffer, offset);
@@ -376,6 +377,10 @@ const decodePricePayload = (buffer) => {
     } else if (fieldNumber === 8 && wireType === WIRE_TYPE.FIXED32) {
       const { value, nextOffset: after } = readFixed32(buffer, offset, true);
       price.renewalCost = value;
+      offset = after;
+    } else if (fieldNumber === 9 && wireType === WIRE_TYPE.LENGTH_DELIMITED) {
+      const { value, nextOffset: after } = readString(buffer, offset);
+      price.reasoning = value;
       offset = after;
     } else {
       offset = skipField(wireType, buffer, offset);

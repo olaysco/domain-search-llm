@@ -25,8 +25,14 @@ type AISuggestionRequest struct {
 }
 
 type DomainSuggestion struct {
-	Domain string  `json:"domain"`
-	Score  float64 `json:"relevance_score,omitempty"`
+	Domain       string   `json:"domain"`
+	Score        float64  `json:"relevance_score,omitempty"`
+	Available    *bool    `json:"available,omitempty"`
+	Price        *float32 `json:"price,omitempty"`
+	Currency     string   `json:"currency,omitempty"`
+	RenewalPrice *float32 `json:"renewal_price,omitempty"`
+	Promotion    *bool    `json:"promotion,omitempty"`
+	Reasoning    string   `json:"reasoning,omitempty"`
 }
 
 type LLMSuggester struct {
@@ -148,37 +154,14 @@ func (ls *LLMSuggester) GenerateDomainSuggestions(ctx context.Context, req AISug
 }
 
 func (ls *LLMSuggester) BuildDomainPrompt(req AISuggestionRequest) string {
-	prefTLDs := stringFromContext(req.Context, "preferred_tlds")
-	exclTLDs := stringFromContext(req.Context, "excluded_tlds")
-	keywords := stringFromContext(req.Context, "brand_keywords")
-	businessType := stringFromContext(req.Context, "business_type")
-	location := stringFromContext(req.Context, "location")
+	// Extract and format context using shared helpers
+	contextFields := ExtractContextFields(req.Context)
 	maxResults := req.MaxResults
 	if maxResults <= 0 {
 		maxResults = 12
 	}
 
-	contextLines := make([]string, 0, 5)
-	if prefTLDs != "" {
-		contextLines = append(contextLines, fmt.Sprintf("- Preferred TLDs: %s", prefTLDs))
-	}
-	if exclTLDs != "" {
-		contextLines = append(contextLines, fmt.Sprintf("- Excluded TLDs: %s", exclTLDs))
-	}
-	if businessType != "" {
-		contextLines = append(contextLines, fmt.Sprintf("- Business type: %s", businessType))
-	}
-	if location != "" {
-		contextLines = append(contextLines, fmt.Sprintf("- Location focus: %s", location))
-	}
-	if keywords != "" {
-		contextLines = append(contextLines, fmt.Sprintf("- Brand keywords to include: %s", keywords))
-	}
-	if len(contextLines) == 0 {
-		contextLines = append(contextLines, "- No additional constraints were provided.")
-	}
-
-	contextSection := strings.Join(contextLines, "\n")
+	contextSection := contextFields.FormatContextSection()
 
 	return fmt.Sprintf(`
 You are an expert creative domain name generator for Openprovider.
@@ -202,16 +185,4 @@ Output JSON (no prose, no explanations):
   "domains": ["domain1.com", "domain2.io", "domain3.ai"]
 }
 `, maxResults, req.Query, contextSection)
-}
-
-func stringFromContext(ctx map[string]interface{}, key string) string {
-	if ctx == nil {
-		return ""
-	}
-	if val, ok := ctx[key]; ok {
-		if s, ok := val.(string); ok {
-			return s
-		}
-	}
-	return ""
 }
